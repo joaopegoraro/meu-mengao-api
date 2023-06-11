@@ -4,6 +4,7 @@ import { CampeonatosModule } from './campeonatos/campeonatos.module';
 import { ClassificacaoModule } from './classificacao/classificacao.module';
 import { PosicaoModule } from './posicao/posicao.module';
 import { RodadaModule } from './rodada/rodada.module';
+import { PartidaModule } from './partida/partida.module';
 
 @Module({
   imports: [
@@ -20,7 +21,8 @@ import { RodadaModule } from './rodada/rodada.module';
     CampeonatosModule,
     ClassificacaoModule,
     PosicaoModule,
-    RodadaModule
+    RodadaModule,
+    PartidaModule
   ],
   controllers: [],
   providers: [],
