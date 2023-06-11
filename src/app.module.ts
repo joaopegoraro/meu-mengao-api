@@ -5,6 +5,7 @@ import { ClassificacaoModule } from './classificacao/classificacao.module';
 import { PosicaoModule } from './posicao/posicao.module';
 import { RodadaModule } from './rodada/rodada.module';
 import { PartidaModule } from './partida/partida.module';
+import { NoticiasModule } from './noticias/noticias.module';
 
 @Module({
   imports: [
@@ -22,7 +23,8 @@ import { PartidaModule } from './partida/partida.module';
     ClassificacaoModule,
     PosicaoModule,
     RodadaModule,
-    PartidaModule
+    PartidaModule,
+    NoticiasModule
   ],
   controllers: [],
   providers: [],
