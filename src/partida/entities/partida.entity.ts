@@ -14,6 +14,12 @@ export class Partida {
     timeFora: string;
 
     @Column()
+    escudoCasa: string;
+
+    @Column()
+    escudoFora: string;
+
+    @Column()
     golsCasa: string;
 
     @Column()
