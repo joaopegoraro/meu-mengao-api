@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CampeonatosModule } from './campeonatos/campeonatos.module';
-import { Campeonato } from './campeonatos/entities/campeonato.entity';
+import { MataMatasModule } from './mata-matas/mata-matas.module';
 
 @Module({
   imports: [
@@ -13,10 +13,10 @@ import { Campeonato } from './campeonatos/entities/campeonato.entity';
       password: 'root',
       database: 'meumengao',
       autoLoadEntities: true,
-      entities: [Campeonato],
       synchronize: true,
     }),
-    CampeonatosModule
+    CampeonatosModule,
+    MataMatasModule
   ],
   controllers: [],
   providers: [],
