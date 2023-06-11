@@ -7,6 +7,7 @@ import { NoticiasModule } from './noticias/noticias.module';
 import { PartidaModule } from './partida/partida.module';
 import { PosicaoModule } from './posicao/posicao.module';
 import { RodadaModule } from './rodada/rodada.module';
+import { ScraperService } from './scraper/scraper.service';
 
 @Module({
   imports: [
@@ -28,7 +29,7 @@ import { RodadaModule } from './rodada/rodada.module';
     NoticiasModule
   ],
   controllers: [],
-  providers: [],
+  providers: [ScraperService],
 })
 export class AppModule {
   configure(consumer: MiddlewareConsumer) {
