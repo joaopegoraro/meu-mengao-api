@@ -3,6 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { CampeonatosModule } from './campeonatos/campeonatos.module';
 import { MataMatasModule } from './mata-matas/mata-matas.module';
 import { ClassificacaoModule } from './classificacao/classificacao.module';
+import { PosicaoModule } from './posicao/posicao.module';
 
 @Module({
   imports: [
@@ -18,7 +19,8 @@ import { ClassificacaoModule } from './classificacao/classificacao.module';
     }),
     CampeonatosModule,
     MataMatasModule,
-    ClassificacaoModule
+    ClassificacaoModule,
+    PosicaoModule
   ],
   controllers: [],
   providers: [],
