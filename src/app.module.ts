@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CampeonatosModule } from './campeonatos/campeonatos.module';
-import { MataMatasModule } from './mata-matas/mata-matas.module';
 import { ClassificacaoModule } from './classificacao/classificacao.module';
 import { PosicaoModule } from './posicao/posicao.module';
+import { RodadaModule } from './rodada/rodada.module';
 
 @Module({
   imports: [
@@ -18,9 +18,9 @@ import { PosicaoModule } from './posicao/posicao.module';
       synchronize: true,
     }),
     CampeonatosModule,
-    MataMatasModule,
     ClassificacaoModule,
-    PosicaoModule
+    PosicaoModule,
+    RodadaModule
   ],
   controllers: [],
   providers: [],

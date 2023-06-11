@@ -1,6 +1,6 @@
 import { Column, PrimaryGeneratedColumn } from 'typeorm';
 
-export class MataMata {
+export class Rodada {
     @PrimaryGeneratedColumn()
     id: number;
 
@@ -9,4 +9,7 @@ export class MataMata {
 
     @Column()
     campeonatoId: number;
+
+    @Column()
+    classificacaoId: number;
 }
