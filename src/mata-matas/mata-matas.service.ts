@@ -7,10 +7,12 @@ import { MataMata } from './entities/mata-mata.entity';
 
 @Injectable()
 export class MataMatasService {
+
   constructor(
     @InjectRepository(MataMata)
     private mataMatasRepository: Repository<MataMata>,
   ) { }
+
   create(createMataMataDto: CreateMataMataDto) {
     return this.mataMatasRepository.save(createMataMataDto);
   }
