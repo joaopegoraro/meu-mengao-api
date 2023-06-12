@@ -31,4 +31,8 @@ export class NoticiasService {
   async remove(id: number) {
     return await this.noticiaRepository.delete(id);
   }
+
+  async removeWithSite(site: string) {
+    return await this.noticiaRepository.delete({ site: site });
+  }
 }

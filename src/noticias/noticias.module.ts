@@ -6,7 +6,10 @@ import { NoticiasService } from './noticias.service';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Noticia])],
-  exports: [TypeOrmModule],
+  exports: [
+    TypeOrmModule,
+    NoticiasService,
+  ],
   controllers: [NoticiasController],
   providers: [NoticiasService]
 })

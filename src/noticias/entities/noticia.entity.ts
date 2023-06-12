@@ -1,5 +1,6 @@
-import { Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
+@Entity()
 export class Noticia {
     @PrimaryGeneratedColumn()
     id: number;
@@ -11,14 +12,14 @@ export class Noticia {
     titulo: string;
 
     @Column()
-    data: number;
+    data: string;
 
     @Column()
     site: string;
 
-    @Column()
+    @Column({ type: 'text' })
     logoSite: string;
 
-    @Column()
+    @Column({ type: 'text' })
     foto: string;
 }
