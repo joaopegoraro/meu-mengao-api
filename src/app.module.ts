@@ -1,4 +1,5 @@
 import { MiddlewareConsumer, Module, RequestMethod } from '@nestjs/common';
+import { ScheduleModule } from '@nestjs/schedule';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthMiddleware } from './auth/auth.middleware';
 import { CampeonatosModule } from './campeonatos/campeonatos.module';
@@ -7,10 +8,11 @@ import { NoticiasModule } from './noticias/noticias.module';
 import { PartidaModule } from './partida/partida.module';
 import { PosicaoModule } from './posicao/posicao.module';
 import { RodadaModule } from './rodada/rodada.module';
-import { ScraperService } from './scraper/scraper.service';
+import { ScraperModule } from './scraper/scraper.module';
 
 @Module({
   imports: [
+    ScheduleModule.forRoot(),
     TypeOrmModule.forRoot({
       type: 'mysql',
       host: 'localhost',
@@ -26,10 +28,11 @@ import { ScraperService } from './scraper/scraper.service';
     PosicaoModule,
     RodadaModule,
     PartidaModule,
-    NoticiasModule
+    NoticiasModule,
+    ScraperModule
   ],
   controllers: [],
-  providers: [ScraperService],
+  providers: [],
 })
 export class AppModule {
   configure(consumer: MiddlewareConsumer) {

@@ -11,6 +11,9 @@ export class Noticia {
     titulo: string;
 
     @Column()
+    data: number;
+
+    @Column()
     site: string;
 
     @Column()
