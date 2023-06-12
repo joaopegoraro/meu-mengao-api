@@ -1,7 +1,7 @@
 import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
 import axios from 'axios';
-import sharp from 'sharp';
+import { ImageUtils } from 'src/utils/image-utils';
 import { NoticiasService } from '../noticias/noticias.service';
 
 @Injectable()
@@ -54,21 +54,13 @@ export class YoutubeScraperService {
             link: youtubeUrl + video["videoId"],
             site: video["author"],
             data: video["published"],
-            logoSite: await this.convertUrlToBase64(logo["url"], 76, 76),
-            foto: await this.convertUrlToBase64(thumbnail["url"], 120, 90),
+            logoSite: await ImageUtils.convertUrlToBase64(logo["url"], 76, 76),
+            foto: await ImageUtils.convertUrlToBase64(thumbnail["url"], 120, 90),
         };
 
         await this.noticiasService.removeWithSite(noticia.site);
         await this.noticiasService.create(noticia);
     }
 
-    private async convertUrlToBase64(imageUrl: string, width: number = 90, height: number = 90) {
-        const response = await axios.get(imageUrl, { responseType: 'arraybuffer' });
-        const buffer = Buffer.from(response.data, 'binary');
-        const image = await sharp(buffer)
-            .resize(width, height)
-            .toBuffer();
-        return image.toString('base64');
-    }
 }
 
