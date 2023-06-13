@@ -21,9 +21,6 @@ export class NoticiasScraperService {
         const browser = await puppeteer.launch({ headless: "new" });
         const page = await browser.newPage();
         await page.goto("https://colunadofla.com/ultimas-noticias/");
-        await page.screenshot({
-            path: 'screenshot.jpg'
-        });
 
         const noticias = await Promise.all(await page
             .evaluate(() => {
@@ -60,7 +57,6 @@ export class NoticiasScraperService {
 
         await this.noticiasService.removeWithSite(noticias[0].site);
         for (var noticia of noticias) {
-            console.log(noticia);
             await this.noticiasService.create(noticia);
         }
     }

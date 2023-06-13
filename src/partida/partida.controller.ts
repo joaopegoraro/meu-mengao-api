@@ -24,7 +24,7 @@ export class PartidaController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.partidaService.findOne(+id);
+    return this.partidaService.findOne(id);
   }
 
   @Patch(':id')

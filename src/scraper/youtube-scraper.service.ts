@@ -39,15 +39,12 @@ export class YoutubeScraperService {
 
         const response = await axios.get(invidiousUrl + channelId)
         const video = response.data["latestVideos"][0];
-        console.log(video["author"]);
 
         // Thumbnail 5 é a 'default', de tamanho 120x90
         const thumbnail = video["videoThumbnails"][5];
-        console.log(thumbnail["url"]);
 
         // Thumbnail do autor 2 tem tamanho 76x76
         const logo = response.data["authorThumbnails"][2];
-        console.log(logo["url"]);
 
         const noticia = {
             titulo: video["title"],

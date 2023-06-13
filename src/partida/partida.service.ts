@@ -28,7 +28,7 @@ export class PartidaService {
     });
   }
 
-  async findOne(id: number) {
+  async findOne(id: string) {
     return await this.partidaRepository.findOneBy({ id });
   }
 

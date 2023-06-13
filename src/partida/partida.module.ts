@@ -6,7 +6,10 @@ import { PartidaService } from './partida.service';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Partida])],
-  exports: [TypeOrmModule],
+  exports: [
+    TypeOrmModule,
+    PartidaService,
+  ],
   controllers: [PartidaController],
   providers: [PartidaService]
 })

@@ -1,9 +1,9 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, PrimaryColumn } from 'typeorm';
 
 @Entity()
 export class Partida {
-    @PrimaryGeneratedColumn()
-    id: number;
+    @PrimaryColumn()
+    id: string;
 
     @Column()
     data: string;
@@ -25,6 +25,9 @@ export class Partida {
 
     @Column()
     golsFora: string;
+
+    @Column()
+    campeonato: string;
 
     @Column()
     rodadaId: number;
