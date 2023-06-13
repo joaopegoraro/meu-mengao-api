@@ -14,10 +14,10 @@ export class Partida {
     @Column()
     timeFora: string;
 
-    @Column()
+    @Column({ type: 'text' })
     escudoCasa: string;
 
-    @Column()
+    @Column({ type: 'text' })
     escudoFora: string;
 
     @Column()
@@ -32,9 +32,9 @@ export class Partida {
     @Column()
     partidaFlamengo: boolean;
 
-    @Column()
+    @Column({ nullable: true })
     rodadaId: number;
 
-    @Column()
+    @Column({ nullable: true })
     rodadaIndex: number;
 }

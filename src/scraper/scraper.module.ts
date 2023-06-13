@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { CampeonatosModule } from '../campeonatos/campeonatos.module';
 import { NoticiasModule } from '../noticias/noticias.module';
 import { PartidaModule } from '../partida/partida.module';
 import { NoticiasScraperService } from './noticias-scraper.service';
@@ -10,6 +11,7 @@ import { YoutubeScraperService } from './youtube-scraper.service';
   imports: [
     NoticiasModule,
     PartidaModule,
+    CampeonatosModule,
   ],
   providers: [
     ScraperService,

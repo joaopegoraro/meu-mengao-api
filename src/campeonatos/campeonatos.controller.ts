@@ -19,7 +19,7 @@ export class CampeonatosController {
 
   @Get(':id')
   async findOne(@Param('id') id: string) {
-    return this.campeonatosService.findOne(+id);
+    return this.campeonatosService.findOne(id);
   }
 
   @Patch(':id')

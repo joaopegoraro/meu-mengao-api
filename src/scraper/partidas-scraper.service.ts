@@ -1,25 +1,22 @@
-import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
-import { Cron, CronExpression } from '@nestjs/schedule';
 import moment from 'moment';
 import puppeteer from 'puppeteer';
+import { CampeonatosService } from '../campeonatos/campeonatos.service';
 import { PartidaService } from '../partida/partida.service';
 import { ImageUtils } from '../utils/image-utils';
 
 @Injectable()
 export class PartidasScraperService {
     constructor(
-        private readonly httpService: HttpService,
         private readonly partidasService: PartidaService,
+        private readonly campeonatosService: CampeonatosService
     ) { }
-
 
     async scrapePartidas() {
         await this.scrapeResultados();
         await this.scrapeCalendario();
     }
 
-    @Cron(CronExpression.EVERY_30_SECONDS)
     private async scrapeResultados() {
         const resutadosUrl = "https://www.flashscore.com.br/equipe/flamengo/WjxY29qB/resultados/";
         this.scrapePartidasFromUrl(resutadosUrl);
@@ -31,9 +28,25 @@ export class PartidasScraperService {
     }
 
     private async scrapePartidasFromUrl(url: string) {
-        const browser = await puppeteer.launch({ headless: "new" });
+        const browser = await puppeteer.launch({
+            headless: "new",
+            args: [
+                '--disable-gpu',
+                '--disable-dev-shm-usage',
+                '--disable-setuid-sandbox',
+                '--no-first-run',
+                '--no-sandbox',
+                '--no-zygote',
+                '--single-process',
+            ]
+        });
         const page = await browser.newPage();
-        await page.goto(url);
+        await page.goto(url, {
+            waitUntil: 'networkidle0',
+        });
+
+        // Fecha sheet de consentimentos de cookies
+        (await page.$("#onetrust-accept-btn-handler")).click();
 
         const partidas = await Promise.all(await page
             .evaluate(() => {
@@ -88,10 +101,42 @@ export class PartidasScraperService {
                 })
             ));
 
-        await browser.close();
 
         for (var partida of partidas) {
             await this.partidasService.create(partida);
+        }
+
+        const campeonatos = new Set<string>();
+        const urls = new Set<string>();
+        let links = await ((await page.$(".sportName")).$$(".event__title--name"))
+        for (let i = 0; i < links.length; i++) {
+            const link = links[i];
+
+            const campeonato = (await (await link.getProperty("innerText")).jsonValue()).toString();
+
+            if (!campeonatos.has(campeonato)) {
+                campeonatos.add(campeonato);
+
+                await Promise.all([
+                    page.waitForNavigation(),
+                    link.tap(),
+                ]);
+
+                urls.add(page.url());
+
+                await Promise.all([
+                    page.waitForNavigation(),
+                    page.goBack(),
+                ]);
+
+                links = await ((await page.$(".sportName")).$$(".event__title--name"))
+            }
+        }
+
+        await browser.close();
+
+        for (var url of urls) {
+            this.campeonatosService.create({ id: url, link: url })
         }
     }
 

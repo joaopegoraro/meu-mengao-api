@@ -20,7 +20,7 @@ export class CampeonatosService {
     return this.campeonatosRepository.find();
   }
 
-  async findOne(id: number) {
+  async findOne(id: string) {
     return this.campeonatosRepository.findOneBy({ id });
   }
 

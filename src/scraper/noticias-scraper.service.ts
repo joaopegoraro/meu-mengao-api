@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import moment from 'moment';
 import puppeteer from 'puppeteer';
 import { NoticiasService } from '../noticias/noticias.service';
 import { ImageUtils } from '../utils/image-utils';
@@ -29,14 +30,13 @@ export class NoticiasScraperService {
                         const title = element.querySelector(".entry-title");
                         const imageUrl = element.querySelector<HTMLImageElement>(".wp-post-image").src;
 
-                        const textoData = element.querySelector<HTMLSpanElement>(".entry-meta").lastChild.textContent;
-                        const data = new Date(textoData);
+                        const data = element.querySelector<HTMLSpanElement>(".entry-meta").lastChild.textContent;
 
                         return {
                             titulo: title.textContent,
                             link: anchor.href,
                             site: anchor.host,
-                            data: data.getTime().toString(),
+                            data: data,
                             logoSite: "",
                             foto: imageUrl,
                         };
@@ -44,6 +44,9 @@ export class NoticiasScraperService {
             })
             .then(async (noticias) =>
                 noticias.map(async noticia => {
+                    const data = moment(noticia.data, "DD/MM/YYYY").toDate();
+                    noticia.data = data.getTime().toString();
+
                     const image64 = await ImageUtils.convertImageUrlToBase64(noticia.foto);
                     noticia.foto = image64;
                     noticia.logoSite = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAE1ElEQVR4AWIAAqYBxSDiNDMz208GQO9VAErvFcW/7/l7YGiMELWsDSoVQiKrWKgsgqqIDP40W2MxTCZBhJSKrFAQGCEEkZgmSVPGlADQQwz8h7PjcF++d73xVKpfcr9zzvndc3/n3HeFr94SHxCOonhPYE8mM7oVBHhr/CjTuiew+0DgCtH3Brh+IJCmSkCBEN4Al6oEtlUI9Pf3w/n5uVqcnZ1J/h4cHEB3dzdUVFRAWVkZtLS0wMrKCmfX0dEhIZAgk90T2FEhMDIyAre3t8/i4uICsrOzwdDQ8Mmduru7Q1NTE9zc3JB9T0+PhMB7RmD3FQT29/cpwZ29kZER+Pr6QkxMDMTGxoK/vz8YGxsrifj4+MDOzg5HIE1L63UEFAoFODk5gYWFBdTU1NxVgtavrq5gfX0dTk9PqexFRUWgp6dHMR0cHKgajwl8q6OrMQEK7O3tDYmJiXB0dASXl5fQ2NhIu9bR0SF/Nzc3KCgoINu5uTkwNzendWdnZwmBZLmuxhogsc3Pz9OuKysrwdramjv7trY2ic/4+DiIosh1wXu5zosrQGXd29sjQZWXl4OVlRXZ2trasp0R7O3tYXd3l/MPCAjgCHz/3BFsbGyQyu+ce3t7lWru6+uDoKAgCA0Nha2trbs1Ovvl5WVmwwHbkyPwAyOw/QSB9vZ2MDAwoP8nJycpyOrqKgwPD0NraysJqqurC6ampqgj1BwZEV9cXIT6+nqOQLyaI6CBoa+vr3RIT08HGxubx+dMZ2pmZgZ2dnbg4uICERERUFtbS0OJJZ+engYTExMiUFJSwhH4Tt0R5OfnM2MOjo6OVBGcbGp3vbm5CWlpaaCtrQ0eHh60FhIS8nICzc3NgENK6WBqagrR0dFQVVUFg4ODFPDurJeWlmBsbAwGBgagrq4OMjIywMvLC7S0tMhPLpfD7OwsHB8fs4pyBNS2IYqMypybm/u/uz08PKSKZGVlcdXCIUU2paWlT15GSUwDqiIcHR2lc0tKSuISLiwsQGdnJw0gtjYxMUF6eJwEu4e+4bBi3zgC3zwzB9iIpfZKTU0lIXp6esLa2poyeUNDA5uADGTLvicnJ7P1l2uAEdje3oaoqCilHuLj42neMw3k5ORwwbFjlMmHhoYkE1AjDeDNRS3EnFALLDCRiIyM5ALn5eUxGxpQeFlxNi8axXFxcZIuyMzMVAY+OTkBPz8/bibgeGY2JFpsP/Zd0yOQAruBys2uYbzpuOTV1dXK5NfX1xAWFqYuOXcdc7+KRxGBCPHBuLi4mBSPvUwTTzU5azUGvKafTCpDfI2YoDwqd8EfMpn8RhAKcfGIfVxAxCDkCEtLS3B1deWCFhYWSpKnpKRwNrqIeMRfysSEA8z3iyP7UcqgEMWPrgUhBQ1WmfEW4ifExyqBg4ODJWVPSEiQfP8E8TNiT5r4b4yftCeK+pKXkSr+FMV3aBiODjPM+QRRgfj0IUFgYCDMzMzQrAgPD1cm/gxRhfjnUWLc7e//CkLIJMZ98mmmDp+LMhk6fokB+liwD4hmhMtDQtZqHoh25aODcIN+v6G/57vn3oYvwZUgOGLAXzHw1WPBJqkIC3GBdtVo/8WLH6ea4EwQrB4Eq0BwwsLSm2v8On4NFMK9YDHpBP5NPGDC0hD/AXG3IMvlJzvdAAAAAElFTkSuQmCC";

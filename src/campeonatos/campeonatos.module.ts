@@ -6,7 +6,10 @@ import { Campeonato } from './entities/campeonato.entity';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Campeonato])],
-  exports: [TypeOrmModule],
+  exports: [
+    TypeOrmModule,
+    CampeonatosService,
+  ],
   controllers: [CampeonatosController],
   providers: [CampeonatosService]
 })
