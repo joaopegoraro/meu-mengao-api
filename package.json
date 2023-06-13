@@ -30,6 +30,7 @@
     "axios": "^1.4.0",
     "firebase-admin": "^11.9.0",
     "install": "^0.13.0",
+    "moment": "^2.29.4",
     "mysql2": "^3.3.3",
     "nest-puppeteer": "^1.1.1",
     "npm": "^9.7.1",

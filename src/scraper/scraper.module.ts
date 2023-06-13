@@ -1,4 +1,3 @@
-import { HttpModule } from '@nestjs/axios';
 import { Module } from '@nestjs/common';
 import { NoticiasModule } from '../noticias/noticias.module';
 import { PartidaModule } from '../partida/partida.module';
@@ -9,7 +8,6 @@ import { YoutubeScraperService } from './youtube-scraper.service';
 
 @Module({
   imports: [
-    HttpModule,
     NoticiasModule,
     PartidaModule,
   ],

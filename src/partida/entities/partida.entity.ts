@@ -30,6 +30,9 @@ export class Partida {
     campeonato: string;
 
     @Column()
+    partidaFlamengo: boolean;
+
+    @Column()
     rodadaId: number;
 
     @Column()

@@ -1,4 +1,3 @@
-import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
 import puppeteer from 'puppeteer';
 import { NoticiasService } from '../noticias/noticias.service';
@@ -7,7 +6,6 @@ import { ImageUtils } from '../utils/image-utils';
 @Injectable()
 export class NoticiasScraperService {
     constructor(
-        private readonly httpService: HttpService,
         private readonly noticiasService: NoticiasService,
     ) { }
 

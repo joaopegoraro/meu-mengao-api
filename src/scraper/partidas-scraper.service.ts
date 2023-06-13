@@ -1,6 +1,7 @@
 import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
+import moment from 'moment';
 import puppeteer from 'puppeteer';
 import { PartidaService } from '../partida/partida.service';
 import { ImageUtils } from '../utils/image-utils';
@@ -37,7 +38,6 @@ export class PartidasScraperService {
         const partidas = await Promise.all(await page
             .evaluate(() => {
                 return [...document.querySelectorAll<HTMLDivElement>(".sportName > div")]
-                    // Divide a lista em pares
                     .reduce<HTMLDivElement[][]>((result, value) => {
                         if (value.classList.contains("event__header")) {
                             result.push([value])
@@ -53,7 +53,7 @@ export class PartidasScraperService {
                         return chunk
                             .filter((element, index) => index != 0)
                             .map((element) => {
-                                const data = element.querySelector(".event__time").textContent;
+                                const dataText = element.querySelector(".event__time").textContent;
                                 const timeCasa = element.querySelector(".event__participant--home").textContent;
                                 const timeFora = element.querySelector(".event__participant--away").textContent;
                                 const golsCasa = element.querySelector(".event__score--home").textContent;
@@ -62,31 +62,37 @@ export class PartidasScraperService {
                                 const escudoForaUrl = element.querySelector<HTMLImageElement>(".event__logo--away").src;
 
                                 return {
-                                    id: data + timeCasa + timeFora,
-                                    data: data,
+                                    id: element.id,
+                                    data: dataText,
                                     timeCasa: timeCasa,
                                     timeFora: timeFora,
                                     golsCasa: golsCasa,
                                     golsFora: golsFora,
                                     campeonato: campeonato,
+                                    partidaFlamengo: true,
                                     escudoCasa: escudoCasaUrl,
-                                    escudoFora: escudoForaUrl
+                                    escudoFora: escudoForaUrl,
                                 }
                             });
                     });
             })
             .then(async (partidas) =>
                 partidas.map(async partida => {
+                    const data = moment(partida.data, "DD.MM. HH:mm").toDate() || moment(partida.data, "DD.MM.YYYY").toDate();
+                    partida.data = data.getTime().toString();
+
                     partida.escudoCasa = await ImageUtils.convertImageUrlToBase64(partida.escudoCasa, 30, 30);
                     partida.escudoFora = await ImageUtils.convertImageUrlToBase64(partida.escudoFora, 30, 30);
                     return partida;
+
                 })
             ));
 
-        console.log(partidas);
-
         await browser.close();
 
+        for (var partida of partidas) {
+            await this.partidasService.create(partida);
+        }
     }
 
 }
