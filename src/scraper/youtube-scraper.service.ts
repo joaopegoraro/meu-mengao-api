@@ -1,8 +1,8 @@
 import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
 import axios from 'axios';
-import { ImageUtils } from 'src/utils/image-utils';
 import { NoticiasService } from '../noticias/noticias.service';
+import { ImageUtils } from '../utils/image-utils';
 
 @Injectable()
 export class YoutubeScraperService {
@@ -54,8 +54,8 @@ export class YoutubeScraperService {
             link: youtubeUrl + video["videoId"],
             site: video["author"],
             data: video["published"],
-            logoSite: await ImageUtils.convertUrlToBase64(logo["url"], 76, 76),
-            foto: await ImageUtils.convertUrlToBase64(thumbnail["url"], 120, 90),
+            logoSite: await ImageUtils.convertImageUrlToBase64(logo["url"], 76, 76),
+            foto: await ImageUtils.convertImageUrlToBase64(thumbnail["url"], 120, 90),
         };
 
         await this.noticiasService.removeWithSite(noticia.site);

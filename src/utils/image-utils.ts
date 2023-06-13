@@ -6,7 +6,7 @@ export class ImageUtils {
     static readonly DEFAULT_WIDTH = 90;
     static readonly DEFAULT_HEIGHT = 120;
 
-    static async convertUrlToBase64(
+    static async convertImageUrlToBase64(
         imageUrl: string,
         width: number = this.DEFAULT_WIDTH,
         height: number = this.DEFAULT_HEIGHT,
