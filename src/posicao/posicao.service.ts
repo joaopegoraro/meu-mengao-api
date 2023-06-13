@@ -20,10 +20,10 @@ export class PosicaoService {
     return await this.posicaoRepository.find();
   }
 
-  async findWithClassificacaoId(classificacaoId: number) {
+  async findWithCampeonatoId(campeonatoId: string) {
     return await this.posicaoRepository.find({
       where: {
-        classificacaoId: classificacaoId
+        campeonatoId: campeonatoId
       },
     });
   }
@@ -39,5 +39,11 @@ export class PosicaoService {
 
   async remove(id: number) {
     return await this.posicaoRepository.delete(id);
+  }
+
+  async removeWithCampeonatoId(campeonatoId: string) {
+    return await this.posicaoRepository.delete({
+      campeonatoId: campeonatoId
+    });
   }
 }

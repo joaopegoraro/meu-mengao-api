@@ -1,40 +1,49 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, PrimaryColumn } from 'typeorm';
 
 @Entity()
 export class Posicao {
-    @PrimaryGeneratedColumn()
+    @PrimaryColumn()
     id: number;
 
     @Column()
-    posicao: number;
+    posicao: string;
 
     @Column()
     nomeTime: string;
 
-    @Column()
-    pontos: number;
+    @Column({ type: 'text' })
+    escudoTime: string;
 
     @Column()
-    jogos: number;
+    pontos: string;
 
     @Column()
-    vitorias: number;
+    jogos: string;
 
     @Column()
-    empates: number;
+    vitorias: string;
 
     @Column()
-    derrotas: number;
+    empates: string;
 
     @Column()
-    golsFeitos: number;
+    derrotas: string;
 
     @Column()
-    golsSofridos: number;
+    golsFeitos: string;
 
     @Column()
-    saldoGols: number;
+    golsSofridos: string;
 
     @Column()
-    classificacaoId: number;
+    saldoGols: string;
+
+    @Column()
+    campeonatoId: string;
+
+    @Column()
+    classificacaoName: string;
+
+    @Column()
+    classificacaoIndex: number;
 }

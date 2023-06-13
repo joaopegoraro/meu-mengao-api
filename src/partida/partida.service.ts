@@ -20,10 +20,11 @@ export class PartidaService {
     return await this.partidaRepository.find();
   }
 
-  async findWithRodadaId(rodadaId: number) {
+  async findWithRodadaIndex(campeonatoId: string, rodadaIndex: number) {
     return await this.partidaRepository.find({
       where: {
-        rodadaId: rodadaId
+        campeonatoId: campeonatoId,
+        rodadaIndex: rodadaIndex,
       },
     });
   }

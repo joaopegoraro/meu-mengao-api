@@ -17,9 +17,9 @@ export class PosicaoController {
     return this.posicaoService.findAll();
   }
 
-  @Get('classificacao/:classificacaoId')
-  findAllWithClassificacaoId(@Param('classificacaoId') classificacaoId: number) {
-    return this.posicaoService.findWithClassificacaoId(classificacaoId);
+  @Get('classificacao/:campeonatoId')
+  findAllWithClassificacaoId(@Param('campeonatoId') campeonatoId: string) {
+    return this.posicaoService.findWithCampeonatoId(campeonatoId);
   }
 
   @Get(':id')

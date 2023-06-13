@@ -17,9 +17,12 @@ export class PartidaController {
     return this.partidaService.findAll();
   }
 
-  @Get('rodada/:rodadaId')
-  findAllWithRodadaId(@Param('rodadaId') rodadaId: number) {
-    return this.partidaService.findWithRodadaId(rodadaId);
+  @Get('rodada/:campeonatoId/:rodadaIndex')
+  findAllWithRodadaId(
+    @Param('campeonatoId') campeonatoId: string,
+    @Param('rodadaIndex') rodadaIndex: number,
+  ) {
+    return this.partidaService.findWithRodadaIndex(campeonatoId, rodadaIndex);
   }
 
   @Get(':id')

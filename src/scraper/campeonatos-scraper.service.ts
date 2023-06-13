@@ -3,16 +3,15 @@ import moment from 'moment';
 import puppeteer, { Page } from 'puppeteer';
 import { CampeonatosService } from '../campeonatos/campeonatos.service';
 import { Campeonato } from '../campeonatos/entities/campeonato.entity';
-import { ClassificacaoService } from '../classificacao/classificacao.service';
 import { PartidaService } from '../partida/partida.service';
-import { ImageUtils } from '../utils/image-utils';
+import { PosicaoService } from '../posicao/posicao.service';
 
 @Injectable()
 export class CampeonatosScraperService {
     constructor(
         private readonly partidasService: PartidaService,
         private readonly campeonatosService: CampeonatosService,
-        private readonly classificacaoService: ClassificacaoService
+        private readonly posicaoService: PosicaoService,
     ) { }
 
     async scrapeCampeonatos() {
@@ -43,29 +42,95 @@ export class CampeonatosScraperService {
             const urlImagem = document.querySelector<HTMLImageElement>(".heading__logo").src;
 
             return {
-                id: url,
-                link: url,
+                id: "",
+                link: "",
                 nome: nome,
                 ano: ano,
                 logo: urlImagem,
             };
         }).then(async (campeonato) => {
-            campeonato.logo = await ImageUtils.convertImageUrlToBase64(campeonato.logo, 30, 30);
+            campeonato.id = url;
+            campeonato.link = url;
+            //campeonato.logo = await ImageUtils.convertImageUrlToBase64(campeonato.logo, 30, 30);
             return campeonato;
         });
 
         const savedCampeonato = await this.campeonatosService.findOne(campeonato.id);
 
         if (campeonato.ano > savedCampeonato.ano) {
-            await this.classificacaoService.removeWithCampeonatoId(campeonato.id);
+            await this.posicaoService.removeWithCampeonatoId(campeonato.id);
             await this.partidasService.removeWithCampeonatoId(campeonato.id);
         }
-
-        await browser.close();
 
         this.campeonatosService.create(campeonato)
 
         await this.scrapePartidasForCampeonato(page, campeonato);
+        await this.scrapeClassificacoesForCampeonato(page, campeonato);
+
+        await browser.close();
+    }
+
+    private async scrapeClassificacoesForCampeonato(
+        page: Page,
+        campeonato: Campeonato,
+    ) {
+        const classificacaoUrl = campeonato.link + "classificacao";
+        await page.goto(classificacaoUrl, {
+            waitUntil: 'networkidle0',
+        });
+
+        const posicoes = await Promise.all(await page
+            .evaluate(() => {
+                return [...document.querySelectorAll<HTMLDivElement>(".ui-table")]
+                    .flatMap((tabela, index) => {
+                        const nomeTabela = tabela.querySelector(".ui-table__header > .table__headerCell--participant").textContent;
+
+                        return [...tabela.querySelectorAll(".ui-table__body > .ui-table__row")].map((element) => {
+                            const posicao = element.querySelector(".tableCellRank").textContent;
+                            const nomeTime = element.querySelector(".tableCellParticipant__name").textContent;
+                            const escudoUrl = element.querySelector<HTMLImageElement>(".participant__image").src;
+
+                            const colunas = element.querySelectorAll(".table__cell--value");
+                            const jogos = colunas[0].textContent;
+                            const vitorias = colunas[1].textContent;
+                            const empates = colunas[2].textContent;
+                            const derrotas = colunas[3].textContent;
+                            const score = colunas[4].textContent.split(":");
+                            const golsFeitos = parseInt(score[0]) | 0;
+                            const golsSofridos = parseInt(score[1]) | 0;
+                            const saldoGols = golsFeitos - golsSofridos;
+                            const pontos = colunas[5].textContent;
+
+                            return {
+                                id: "",
+                                posicao: posicao,
+                                nomeTime: nomeTime,
+                                escudoTime: escudoUrl,
+                                pontos: pontos,
+                                jogos: jogos,
+                                vitorias: vitorias,
+                                empates: empates,
+                                derrotas: derrotas,
+                                golsFeitos: golsFeitos,
+                                golsSofridos: golsSofridos,
+                                saldoGols: saldoGols,
+                                campeonatoId: "",
+                                classificacaoName: nomeTabela,
+                                classificacaoIndex: index,
+                            };
+                        });
+                    });
+            })
+            .then(async (posicoes) => posicoes.map(async (posicao) => {
+                posicao.campeonatoId = campeonato.id;
+                //posicao.escudoTime = await ImageUtils.convertImageUrlToBase64(posicao.escudoTime, 20, 20);
+                return posicao;
+            })
+            ));
+
+        for (var posicao of posicoes) {
+            await this.posicaoService.create(posicao);
+        }
     }
 
     private async scrapePartidasForCampeonato(
@@ -79,6 +144,7 @@ export class CampeonatosScraperService {
             waitUntil: 'networkidle0',
         });
 
+        // Partidas da lista de resultados são dos mais recentes para os mais antigos, por isso é passado reverseRounds = true, para que a lista fique dos mais antigos para os mais novos.
         const roundLength = await this.scrapeRoundsFromPage(page, campeonato, true, 0);
 
         await page.goto(calendarioUrl, {
@@ -110,6 +176,7 @@ export class CampeonatosScraperService {
 
                         return result;
                     }, [])
+
                 if (reverseRounds) rounds.reverse();
 
                 const partidas = rounds.flatMap((chunk, index) => {
@@ -158,14 +225,13 @@ export class CampeonatosScraperService {
                     const data = moment(partida.data, "DD.MM. HH:mm").toDate() || moment(partida.data, "DD.MM.YYYY").toDate();
                     partida.data = data.getTime().toString();
 
-                    partida.escudoCasa = await ImageUtils.convertImageUrlToBase64(partida.escudoCasa, 30, 30);
-                    partida.escudoFora = await ImageUtils.convertImageUrlToBase64(partida.escudoFora, 30, 30);
+                    // partida.escudoCasa = await ImageUtils.convertImageUrlToBase64(partida.escudoCasa, 30, 30);
+                    // partida.escudoFora = await ImageUtils.convertImageUrlToBase64(partida.escudoFora, 30, 30);
                     return partida;
                 }));
 
                 return partidasWithRounds;
             });
-
 
         for (var partida of partidasWithRounds.partidas) {
             await this.partidasService.create(partida);

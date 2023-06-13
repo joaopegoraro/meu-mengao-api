@@ -3,7 +3,6 @@ import moment from 'moment';
 import puppeteer from 'puppeteer';
 import { CampeonatosService } from '../campeonatos/campeonatos.service';
 import { PartidaService } from '../partida/partida.service';
-import { ImageUtils } from '../utils/image-utils';
 
 @Injectable()
 export class PartidasScraperService {
@@ -95,8 +94,8 @@ export class PartidasScraperService {
                     const data = moment(partida.data, "DD.MM. HH:mm").toDate() || moment(partida.data, "DD.MM.YYYY").toDate();
                     partida.data = data.getTime().toString();
 
-                    partida.escudoCasa = await ImageUtils.convertImageUrlToBase64(partida.escudoCasa, 30, 30);
-                    partida.escudoFora = await ImageUtils.convertImageUrlToBase64(partida.escudoFora, 30, 30);
+                    //  partida.escudoCasa = await ImageUtils.convertImageUrlToBase64(partida.escudoCasa, 30, 30);
+                    //  partida.escudoFora = await ImageUtils.convertImageUrlToBase64(partida.escudoFora, 30, 30);
                     return partida;
 
                 })
@@ -130,6 +129,7 @@ export class PartidasScraperService {
             partida.campeonatoId = campeonatosWithUrl[partida.campeonato];
             await this.partidasService.create(partida);
         }
+
 
         await browser.close();
 

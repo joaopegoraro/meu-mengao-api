@@ -6,7 +6,10 @@ import { PosicaoService } from './posicao.service';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Posicao])],
-  exports: [TypeOrmModule],
+  exports: [
+    TypeOrmModule,
+    PosicaoService,
+  ],
   controllers: [PosicaoController],
   providers: [PosicaoService]
 })
