@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { CampeonatosScraperService } from './campeonatos-scraper.service';
 import { NoticiasScraperService } from './noticias-scraper.service';
 import { PartidasScraperService } from './partidas-scraper.service';
 import { YoutubeScraperService } from './youtube-scraper.service';
@@ -9,13 +10,15 @@ export class ScraperService {
         private readonly noticiasScraper: NoticiasScraperService,
         private readonly youtubeScraper: YoutubeScraperService,
         private readonly partidasScraper: PartidasScraperService,
+        private readonly campeonatosScraper: CampeonatosScraperService,
     ) { }
 
     //@Cron(CronExpression.EVERY_5_SECONDS)
     async scrapeData() {
-        this.noticiasScraper.scrapeNoticias();
-        this.youtubeScraper.scrapeYoutube();
-        this.partidasScraper.scrapePartidas();
+        await this.noticiasScraper.scrapeNoticias();
+        await this.youtubeScraper.scrapeYoutube();
+        await this.partidasScraper.scrapePartidas();
+        await this.campeonatosScraper.scrapeCampeonatos();
     }
 }
 

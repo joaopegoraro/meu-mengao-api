@@ -82,6 +82,7 @@ export class PartidasScraperService {
                                     golsCasa: golsCasa,
                                     golsFora: golsFora,
                                     campeonato: campeonato,
+                                    campeonatoId: "",
                                     partidaFlamengo: true,
                                     escudoCasa: escudoCasaUrl,
                                     escudoFora: escudoForaUrl,
@@ -101,28 +102,20 @@ export class PartidasScraperService {
                 })
             ));
 
-
-        for (var partida of partidas) {
-            await this.partidasService.create(partida);
-        }
-
-        const campeonatos = new Set<string>();
-        const urls = new Set<string>();
+        const campeonatosWithUrl = new Map<string, string>();
         let links = await ((await page.$(".sportName")).$$(".event__title--name"))
         for (let i = 0; i < links.length; i++) {
             const link = links[i];
 
             const campeonato = (await (await link.getProperty("innerText")).jsonValue()).toString();
 
-            if (!campeonatos.has(campeonato)) {
-                campeonatos.add(campeonato);
-
+            if (![...campeonatosWithUrl.keys()].includes(campeonato)) {
                 await Promise.all([
                     page.waitForNavigation(),
                     link.tap(),
                 ]);
 
-                urls.add(page.url());
+                campeonatosWithUrl[campeonato] = page.url();
 
                 await Promise.all([
                     page.waitForNavigation(),
@@ -133,10 +126,19 @@ export class PartidasScraperService {
             }
         }
 
+        for (var partida of partidas) {
+            partida.campeonatoId = campeonatosWithUrl[partida.campeonato];
+            await this.partidasService.create(partida);
+        }
+
         await browser.close();
 
-        for (var url of urls) {
-            this.campeonatosService.create({ id: url, link: url })
+        for (var campeonatoWithUrl of campeonatosWithUrl) {
+            this.campeonatosService.create({
+                id: campeonatoWithUrl[1],
+                link: campeonatoWithUrl[1],
+                nome: campeonatoWithUrl[0]
+            })
         }
     }
 

@@ -40,4 +40,10 @@ export class PartidaService {
   async remove(id: number) {
     return await this.partidaRepository.delete(id);
   }
+
+  async removeWithCampeonatoId(campeonatoId: string) {
+    return await this.partidaRepository.delete({
+      campeonatoId: campeonatoId
+    });
+  }
 }

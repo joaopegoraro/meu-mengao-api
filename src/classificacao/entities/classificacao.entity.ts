@@ -9,5 +9,5 @@ export class Classificacao {
     nome: string;
 
     @Column()
-    campeonatoId: number;
+    campeonatoId: string;
 }

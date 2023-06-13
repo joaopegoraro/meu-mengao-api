@@ -30,10 +30,13 @@ export class Partida {
     campeonato: string;
 
     @Column()
+    campeonatoId: string;
+
+    @Column()
     partidaFlamengo: boolean;
 
     @Column({ nullable: true })
-    rodadaId: number;
+    rodadaName: string;
 
     @Column({ nullable: true })
     rodadaIndex: number;
