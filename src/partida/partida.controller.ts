@@ -5,6 +5,11 @@ import { PartidaService } from './partida.service';
 export class PartidaController {
   constructor(private readonly partidaService: PartidaService) { }
 
+  @Get('proxima')
+  async findProximaPartida() {
+    return this.partidaService.findProximaPartida();
+  }
+
   @Get('resultados')
   async findResultados() {
     return this.partidaService.findResultados();

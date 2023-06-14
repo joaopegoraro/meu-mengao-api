@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { LessThanOrEqual, MoreThan, Repository } from 'typeorm';
+import { LessThan, MoreThanOrEqual, Repository } from 'typeorm';
 import { CreatePartidaDto } from './dto/create-partida.dto';
 import { Partida } from './entities/partida.entity';
 
@@ -15,11 +15,24 @@ export class PartidaService {
     return await this.partidaRepository.save(createPartidaDto);
   }
 
+  async findProximaPartida() {
+    return await this.partidaRepository.find({
+      where: {
+        partidaFlamengo: true,
+        data: MoreThanOrEqual(Date.now().toString()),
+      },
+      order: {
+        data: "ASC",
+      },
+      take: 1
+    });
+  }
+
   async findResultados() {
     return await this.partidaRepository.find({
       where: {
         partidaFlamengo: true,
-        data: LessThanOrEqual(Date.now().toString()),
+        data: LessThan(Date.now().toString()),
       }
     });
   }
@@ -28,7 +41,7 @@ export class PartidaService {
     return await this.partidaRepository.find({
       where: {
         partidaFlamengo: true,
-        data: MoreThan(Date.now().toString()),
+        data: MoreThanOrEqual(Date.now().toString()),
       }
     });
   }
