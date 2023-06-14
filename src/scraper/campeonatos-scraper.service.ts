@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import moment from 'moment';
 import { Page } from 'puppeteer';
 import { CampeonatosService } from '../campeonatos/campeonatos.service';
@@ -15,6 +15,8 @@ export class CampeonatosScraperService {
         private readonly campeonatosService: CampeonatosService,
         private readonly posicaoService: PosicaoService,
     ) { }
+
+    private readonly logger = new Logger(CampeonatosScraperService.name);
 
     async scrapeCampeonatos() {
         const campeonatos = await this.campeonatosService.findAll();
@@ -58,8 +60,13 @@ export class CampeonatosScraperService {
                 await this.scrapePartidasForCampeonato(page, campeonato);
                 await this.scrapeClassificacoesForCampeonato(page, campeonato);
             });
-        } catch (exception) {
-            console.log(`Exception ao tentar fazer scraping do campeonato ${campeonatoToScrape.id} (${campeonatoToScrape.nome}): ` + exception)
+        } catch (e: unknown) {
+            const message = `Exception ao tentar fazer scraping do campeonato ${campeonatoToScrape.id} (${campeonatoToScrape.nome}): `
+            if (e instanceof Error) {
+                this.logger.error(message + e.message, e.stack)
+            } else {
+                this.logger.error(message + e)
+            }
         }
     }
 

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import moment from 'moment';
 import { CampeonatosService } from '../campeonatos/campeonatos.service';
 import { PartidaService } from '../partida/partida.service';
@@ -11,6 +11,8 @@ export class PartidasScraperService {
         private readonly partidasService: PartidaService,
         private readonly campeonatosService: CampeonatosService
     ) { }
+
+    private readonly logger = new Logger(PartidasScraperService.name);
 
     async scrapePartidas() {
         await this.scrapeResultados();
@@ -133,8 +135,13 @@ export class PartidasScraperService {
                 };
                 await this.campeonatosService.create(newCampeonato)
             }
-        } catch (exception) {
-            console.log(`Exception ao tentar fazer scraping da url ${url}: ` + exception)
+        } catch (e: unknown) {
+            const message = `Erro ao tentar fazer scraping da url ${url}: `
+            if (e instanceof Error) {
+                this.logger.error(message + e.message, e.stack)
+            } else {
+                this.logger.error(message + e)
+            }
         }
     }
 

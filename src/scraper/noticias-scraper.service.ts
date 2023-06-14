@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import moment from 'moment';
 import { NoticiasService } from '../noticias/noticias.service';
 import { ImageUtils } from '../utils/image-utils';
@@ -10,6 +10,7 @@ export class NoticiasScraperService {
         private readonly noticiasService: NoticiasService,
     ) { }
 
+    private readonly logger = new Logger(NoticiasScraperService.name);
 
     async scrapeNoticias() {
         await this.scrapeGE();
@@ -57,10 +58,16 @@ export class NoticiasScraperService {
             for (var noticia of noticias) {
                 await this.noticiasService.create(noticia);
             }
-        } catch (exception) {
-            console.log(`Exception ao tentar fazer scraping da Coluna do Fla: ` + exception)
+        } catch (e: unknown) {
+            const message = `Exception ao tentar fazer scraping da Coluna do Fla: `
+            if (e instanceof Error) {
+                this.logger.error(message + e.message, e.stack)
+            } else {
+                this.logger.error(message + e)
+            }
         }
     }
+
 
     private async scrapeGE() {
         try {
@@ -128,8 +135,13 @@ export class NoticiasScraperService {
                     await this.noticiasService.create(noticia);
                 }
             })
-        } catch (exception) {
-            console.log(`Exception ao tentar fazer scraping do Globo Esporte: ` + exception)
+        } catch (e: unknown) {
+            const message = `Exception ao tentar fazer scraping do Globo Esporte: `
+            if (e instanceof Error) {
+                this.logger.error(message + e.message, e.stack)
+            } else {
+                this.logger.error(message + e)
+            }
         }
     }
 }

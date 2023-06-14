@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import axios from 'axios';
 import { NoticiasService } from '../noticias/noticias.service';
 import { ImageUtils } from '../utils/image-utils';
@@ -9,6 +9,7 @@ export class YoutubeScraperService {
         private readonly noticiasService: NoticiasService,
     ) { }
 
+    private readonly logger = new Logger(YoutubeScraperService.name);
 
     async scrapeYoutube() {
         await this.scrapeVeneCasagrande();
@@ -56,8 +57,14 @@ export class YoutubeScraperService {
 
             await this.noticiasService.removeWithSite(noticia.site);
             await this.noticiasService.create(noticia);
-        } catch (exception) {
-            console.log(`Exception ao tentar recolher dados do canal do youtube ${channelId}: ` + exception)
+
+        } catch (e: unknown) {
+            const message = `Erro ao tentar recolher dados do canal ${channelId}: `;
+            if (e instanceof Error) {
+                this.logger.error(message + e.message, e.stack)
+            } else {
+                this.logger.error(message + e)
+            }
         }
     }
 
