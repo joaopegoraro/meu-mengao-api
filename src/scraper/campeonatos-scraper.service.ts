@@ -24,39 +24,43 @@ export class CampeonatosScraperService {
     }
 
     private async scrapeCampeonato(campeonatoToScrape: Campeonato) {
-        await ScraperUtils.scrapePage({ url: campeonatoToScrape.link, headless: false }, async (page) => {
+        try {
+            await ScraperUtils.scrapePage({ url: campeonatoToScrape.link, headless: false }, async (page) => {
 
-            const campeonato = await page.evaluate(() => {
-                const nome = document.querySelector(".heading__name").textContent;
-                const ano = document.querySelector(".heading__info").textContent;
-                const urlImagem = document.querySelector<HTMLImageElement>(".heading__logo").src;
+                const campeonato = await page.evaluate(() => {
+                    const nome = document.querySelector(".heading__name").textContent;
+                    const ano = document.querySelector(".heading__info").textContent;
+                    const urlImagem = document.querySelector<HTMLImageElement>(".heading__logo").src;
 
-                return {
-                    id: "",
-                    link: "",
-                    nome: nome,
-                    ano: ano,
-                    logo: urlImagem,
-                };
-            }).then(async (scrapedCampeonato) => {
-                scrapedCampeonato.id = campeonatoToScrape.id;
-                scrapedCampeonato.link = campeonatoToScrape.link;
-                scrapedCampeonato.logo = await ImageUtils.convertImageUrlToBase64(scrapedCampeonato.logo, 30, 30);
-                return scrapedCampeonato;
+                    return {
+                        id: "",
+                        link: "",
+                        nome: nome,
+                        ano: ano,
+                        logo: urlImagem,
+                    };
+                }).then(async (scrapedCampeonato) => {
+                    scrapedCampeonato.id = campeonatoToScrape.id;
+                    scrapedCampeonato.link = campeonatoToScrape.link;
+                    scrapedCampeonato.logo = await ImageUtils.convertImageUrlToBase64(scrapedCampeonato.logo, 30, 30);
+                    return scrapedCampeonato;
+                });
+
+                const savedCampeonato = await this.campeonatosService.findOne(campeonato.id);
+
+                if (savedCampeonato && savedCampeonato.ano != null && campeonato.ano > savedCampeonato.ano) {
+                    await this.posicaoService.removeWithCampeonatoId(campeonato.id);
+                    await this.partidasService.removeWithCampeonatoId(campeonato.id);
+                }
+
+                await this.campeonatosService.create(campeonato)
+
+                await this.scrapePartidasForCampeonato(page, campeonato);
+                await this.scrapeClassificacoesForCampeonato(page, campeonato);
             });
-
-            const savedCampeonato = await this.campeonatosService.findOne(campeonato.id);
-
-            if (savedCampeonato && savedCampeonato.ano != null && campeonato.ano > savedCampeonato.ano) {
-                await this.posicaoService.removeWithCampeonatoId(campeonato.id);
-                await this.partidasService.removeWithCampeonatoId(campeonato.id);
-            }
-
-            await this.campeonatosService.create(campeonato)
-
-            await this.scrapePartidasForCampeonato(page, campeonato);
-            await this.scrapeClassificacoesForCampeonato(page, campeonato);
-        });
+        } catch (exception) {
+            console.log(`Exception ao tentar fazer scraping do campeonato ${campeonatoToScrape.id} (${campeonatoToScrape.nome}): ` + exception)
+        }
     }
 
     private async scrapeClassificacoesForCampeonato(

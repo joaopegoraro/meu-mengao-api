@@ -7,7 +7,9 @@ export class PartidaController {
 
   @Get('proxima')
   async findProximaPartida() {
-    return this.partidaService.findProximaPartida();
+    const proximaPartida = await this.partidaService.findProximaPartida();
+    if (proximaPartida)
+    return proximaPartida;
   }
 
   @Get('resultados')
