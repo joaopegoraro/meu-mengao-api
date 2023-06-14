@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { Cron, CronExpression } from '@nestjs/schedule';
 import moment from 'moment';
 import { CampeonatosScraperService } from './campeonatos-scraper.service';
 import { NoticiasScraperService } from './noticias-scraper.service';
@@ -14,12 +15,8 @@ export class ScraperService {
         private readonly campeonatosScraper: CampeonatosScraperService,
     ) { }
 
-    onModuleInit() {
-        this.scrapeData();
-    }
-
-    //@Cron(CronExpression.EVERY_HOUR)
-    async scrapeData() {
+    @Cron(CronExpression.EVERY_HOUR)
+    async scrapeData(): Promise<void> {
         await this.noticiasScraper.scrapeNoticias();
         await this.youtubeScraper.scrapeYoutube();
         await this.partidasScraper.scrapePartidas();
