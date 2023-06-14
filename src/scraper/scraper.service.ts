@@ -21,7 +21,7 @@ export class ScraperService {
         await this.partidasScraper.scrapePartidas();
         await this.campeonatosScraper.scrapeCampeonatos();
 
-        console.log("SCRAPING CONCLUÍDO")
+        console.log(`SCRAPING CONCLUÍDO (${Date.now().toString()})`)
     }
 }
 
