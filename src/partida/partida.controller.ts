@@ -1,42 +1,32 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
-import { CreatePartidaDto } from './dto/create-partida.dto';
-import { UpdatePartidaDto } from './dto/update-partida.dto';
+import { Controller, Get, Param } from '@nestjs/common';
 import { PartidaService } from './partida.service';
 
-@Controller('partida')
+@Controller('partidas')
 export class PartidaController {
   constructor(private readonly partidaService: PartidaService) { }
 
-  @Post()
-  async create(@Body() createPartidaDto: CreatePartidaDto) {
-    return this.partidaService.create(createPartidaDto);
+  @Get('resultados')
+  async findResultados() {
+    return this.partidaService.findResultados();
   }
 
-  @Get()
-  async findAll() {
-    return this.partidaService.findAll();
+  @Get('calendario')
+  async findCalendario() {
+    return this.partidaService.findCalendario();
   }
 
-  @Get('rodada/:campeonatoId/:rodadaIndex')
-  async findAllWithRodadaId(
+  @Get('campeonato/:campeonatoId/:rodadaIndex')
+  async findAllWithRodadaIndex(
     @Param('campeonatoId') campeonatoId: string,
     @Param('rodadaIndex') rodadaIndex: number,
   ) {
     return this.partidaService.findWithRodadaIndex(campeonatoId, rodadaIndex);
   }
 
-  @Get(':id')
-  async findOne(@Param('id') id: string) {
-    return this.partidaService.findOne(id);
-  }
-
-  @Patch(':id')
-  async update(@Param('id') id: string, @Body() updatePartidaDto: UpdatePartidaDto) {
-    return this.partidaService.update(+id, updatePartidaDto);
-  }
-
-  @Delete(':id')
-  async remove(@Param('id') id: string) {
-    return this.partidaService.remove(+id);
+  @Get('campeonato/:campeonatoId')
+  async findAllWithCampeonatoId(
+    @Param('campeonatoId') campeonatoId: string,
+  ) {
+    return this.partidaService.findWithCampeonatoId(campeonatoId);
   }
 }

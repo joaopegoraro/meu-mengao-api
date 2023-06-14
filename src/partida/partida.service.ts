@@ -1,8 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { LessThanOrEqual, MoreThan, Repository } from 'typeorm';
 import { CreatePartidaDto } from './dto/create-partida.dto';
-import { UpdatePartidaDto } from './dto/update-partida.dto';
 import { Partida } from './entities/partida.entity';
 
 @Injectable()
@@ -16,8 +15,30 @@ export class PartidaService {
     return await this.partidaRepository.save(createPartidaDto);
   }
 
-  async findAll() {
-    return await this.partidaRepository.find();
+  async findResultados() {
+    return await this.partidaRepository.find({
+      where: {
+        partidaFlamengo: true,
+        data: MoreThan(Date.now().toString()),
+      }
+    });
+  }
+
+  async findCalendario() {
+    return await this.partidaRepository.find({
+      where: {
+        partidaFlamengo: true,
+        data: LessThanOrEqual(Date.now().toString()),
+      }
+    });
+  }
+
+  async findWithCampeonatoId(campeonatoId: string) {
+    return await this.partidaRepository.find({
+      where: {
+        campeonatoId: campeonatoId
+      },
+    });
   }
 
   async findWithRodadaIndex(campeonatoId: string, rodadaIndex: number) {
@@ -29,18 +50,6 @@ export class PartidaService {
     });
   }
 
-  async findOne(id: string) {
-    return await this.partidaRepository.findOneBy({ id });
-  }
-
-
-  async update(id: number, updatePartidaDto: UpdatePartidaDto) {
-    return await this.partidaRepository.update(id, updatePartidaDto);
-  }
-
-  async remove(id: number) {
-    return await this.partidaRepository.delete(id);
-  }
 
   async removeWithCampeonatoId(campeonatoId: string) {
     return await this.partidaRepository.delete({
