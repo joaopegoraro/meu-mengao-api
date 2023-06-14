@@ -19,12 +19,12 @@ export class CampeonatosScraperService {
     async scrapeCampeonatos() {
         const campeonatos = await this.campeonatosService.findAll();
         for (var campeonato of campeonatos) {
-            await this.scrapeCampeonatoFromUrl(campeonato.link);
+            await this.scrapeCampeonato(campeonato);
         }
     }
 
-    private async scrapeCampeonatoFromUrl(url: string) {
-        await ScraperUtils.scrapePage({ url }, async (page) => {
+    private async scrapeCampeonato(campeonatoToScrape: Campeonato) {
+        await ScraperUtils.scrapePage({ url: campeonatoToScrape.link, headless: false }, async (page) => {
 
             const campeonato = await page.evaluate(() => {
                 const nome = document.querySelector(".heading__name").textContent;
@@ -38,16 +38,16 @@ export class CampeonatosScraperService {
                     ano: ano,
                     logo: urlImagem,
                 };
-            }).then(async (campeonato) => {
-                campeonato.id = url;
-                campeonato.link = url;
-                campeonato.logo = await ImageUtils.convertImageUrlToBase64(campeonato.logo, 30, 30);
-                return campeonato;
+            }).then(async (scrapedCampeonato) => {
+                scrapedCampeonato.id = campeonatoToScrape.id;
+                scrapedCampeonato.link = campeonatoToScrape.link;
+                scrapedCampeonato.logo = await ImageUtils.convertImageUrlToBase64(scrapedCampeonato.logo, 30, 30);
+                return scrapedCampeonato;
             });
 
             const savedCampeonato = await this.campeonatosService.findOne(campeonato.id);
 
-            if (savedCampeonato.ano != null && campeonato.ano > savedCampeonato.ano) {
+            if (savedCampeonato && savedCampeonato.ano != null && campeonato.ano > savedCampeonato.ano) {
                 await this.posicaoService.removeWithCampeonatoId(campeonato.id);
                 await this.partidasService.removeWithCampeonatoId(campeonato.id);
             }
@@ -225,4 +225,3 @@ export class CampeonatosScraperService {
         return partidasWithRounds.roundsSize;
     }
 }
-

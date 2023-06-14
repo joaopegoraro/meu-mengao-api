@@ -17,6 +17,8 @@ export class ScraperService {
 
     @Cron(CronExpression.EVERY_HOUR)
     async scrapeData(): Promise<void> {
+        console.log(`SCRAPING INICIADO (${moment().format()})`)
+
         await this.noticiasScraper.scrapeNoticias();
         await this.youtubeScraper.scrapeYoutube();
         await this.partidasScraper.scrapePartidas();

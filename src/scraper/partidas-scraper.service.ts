@@ -87,7 +87,7 @@ export class PartidasScraperService {
                     })
                 ));
 
-            const campeonatosWithUrl = new Map<string, string>();
+            const campeonatosWithUrl = new Map<string, { id: string, url: string }>();
             let links = await ((await page.$(".sportName")).$$(".event__title--name"))
             for (let i = 0; i < links.length; i++) {
                 const link = links[i];
@@ -100,7 +100,9 @@ export class PartidasScraperService {
                         page.waitForNavigation(),
                     ])
 
-                    campeonatosWithUrl.set(campeonato, page.url());
+                    const url = page.url();
+                    const id = new URL(url).pathname.split('/').filter(Boolean).pop();
+                    campeonatosWithUrl.set(campeonato, { id, url });
 
                     await Promise.all([
                         page.goBack(),
@@ -112,7 +114,8 @@ export class PartidasScraperService {
             }
 
             for (var partida of partidas) {
-                partida.campeonatoId = campeonatosWithUrl.get(partida.campeonato);
+                const campeonatoData = campeonatosWithUrl.get(partida.campeonato);
+                partida.campeonatoId = campeonatoData.id;
                 await this.partidasService.create(partida);
             }
 
@@ -120,10 +123,12 @@ export class PartidasScraperService {
         });
 
         for (var campeonatoWithUrl of campeonatosWithUrl) {
+            const campeonatoData = campeonatoWithUrl[1]
+            const campeonatoNome = campeonatoWithUrl[0]
             const newCampeonato = {
-                id: campeonatoWithUrl[1],
-                link: campeonatoWithUrl[1],
-                nome: campeonatoWithUrl[0]
+                id: campeonatoData.id,
+                link: campeonatoData.url,
+                nome: campeonatoNome,
             };
             await this.campeonatosService.create(newCampeonato)
         }

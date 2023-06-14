@@ -28,6 +28,7 @@ export class ScraperUtils {
         }));
 
         const page = options.page || await browser.newPage();
+
         await page.goto(options.url, { waitUntil: options.waitUntil || 'networkidle0' });
 
         const result = onScraping ? await onScraping(page, browser) : null;

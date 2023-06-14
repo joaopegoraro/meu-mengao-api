@@ -19,7 +19,7 @@ export class PartidaService {
     return await this.partidaRepository.find({
       where: {
         partidaFlamengo: true,
-        data: MoreThan(Date.now().toString()),
+        data: LessThanOrEqual(Date.now().toString()),
       }
     });
   }
@@ -28,7 +28,7 @@ export class PartidaService {
     return await this.partidaRepository.find({
       where: {
         partidaFlamengo: true,
-        data: LessThanOrEqual(Date.now().toString()),
+        data: MoreThan(Date.now().toString()),
       }
     });
   }

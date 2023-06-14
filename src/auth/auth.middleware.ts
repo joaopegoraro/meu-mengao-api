@@ -29,7 +29,7 @@ export class AuthMiddleware implements NestMiddleware {
 
   use(req: Request, res: Response, next: Function) {
     const token = req.headers.authorization;
-    console.log(token);
+    next();
     if (token != null && token != '') {
       this.defaultApp.auth().verifyIdToken(token.replace('Bearer ', ''))
         .then(async decodedToken => {
