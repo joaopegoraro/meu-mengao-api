@@ -3,6 +3,7 @@ import moment from 'moment';
 import puppeteer from 'puppeteer';
 import { CampeonatosService } from '../campeonatos/campeonatos.service';
 import { PartidaService } from '../partida/partida.service';
+import { ImageUtils } from '../utils/image-utils';
 
 @Injectable()
 export class PartidasScraperService {
@@ -18,12 +19,12 @@ export class PartidasScraperService {
 
     private async scrapeResultados() {
         const resutadosUrl = "https://www.flashscore.com.br/equipe/flamengo/WjxY29qB/resultados/";
-        this.scrapePartidasFromUrl(resutadosUrl);
+        await this.scrapePartidasFromUrl(resutadosUrl);
     }
 
     private async scrapeCalendario() {
         const calendarioUrl = "https://www.flashscore.com.br/equipe/flamengo/WjxY29qB/calendario/";
-        this.scrapePartidasFromUrl(calendarioUrl);
+        await this.scrapePartidasFromUrl(calendarioUrl);
     }
 
     private async scrapePartidasFromUrl(url: string) {
@@ -94,8 +95,8 @@ export class PartidasScraperService {
                     const data = moment(partida.data, "DD.MM. HH:mm").toDate() || moment(partida.data, "DD.MM.YYYY").toDate();
                     partida.data = data.getTime().toString();
 
-                    //  partida.escudoCasa = await ImageUtils.convertImageUrlToBase64(partida.escudoCasa, 30, 30);
-                    //  partida.escudoFora = await ImageUtils.convertImageUrlToBase64(partida.escudoFora, 30, 30);
+                    partida.escudoCasa = await ImageUtils.convertImageUrlToBase64(partida.escudoCasa, 30, 30);
+                    partida.escudoFora = await ImageUtils.convertImageUrlToBase64(partida.escudoFora, 30, 30);
                     return partida;
 
                 })
@@ -110,26 +111,26 @@ export class PartidasScraperService {
 
             if (![...campeonatosWithUrl.keys()].includes(campeonato)) {
                 await Promise.all([
+                    page.evaluate((el: HTMLSpanElement) => el.click(), link),
                     page.waitForNavigation(),
-                    link.tap(),
-                ]);
+                ])
 
-                campeonatosWithUrl[campeonato] = page.url();
+                campeonatosWithUrl.set(campeonato, page.url());
 
                 await Promise.all([
-                    page.waitForNavigation(),
                     page.goBack(),
+                    page.waitForNavigation(),
                 ]);
+                console.log("CAMPEONATO " + campeonato + " ADICIONADO");
 
                 links = await ((await page.$(".sportName")).$$(".event__title--name"))
             }
         }
 
         for (var partida of partidas) {
-            partida.campeonatoId = campeonatosWithUrl[partida.campeonato];
+            partida.campeonatoId = campeonatosWithUrl.get(partida.campeonato);
             await this.partidasService.create(partida);
         }
-
 
         await browser.close();
 
