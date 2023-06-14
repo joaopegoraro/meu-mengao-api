@@ -121,7 +121,6 @@ export class PartidasScraperService {
                     page.goBack(),
                     page.waitForNavigation(),
                 ]);
-                console.log("CAMPEONATO " + campeonato + " ADICIONADO");
 
                 links = await ((await page.$(".sportName")).$$(".event__title--name"))
             }

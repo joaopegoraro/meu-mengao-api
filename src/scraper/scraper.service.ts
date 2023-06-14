@@ -19,10 +19,10 @@ export class ScraperService {
 
     //@Cron(CronExpression.EVERY_30_SECONDS)
     async scrapeData() {
-        //await this.noticiasScraper.scrapeNoticias();
-        //await this.youtubeScraper.scrapeYoutube();
-        await this.partidasScraper.scrapePartidas();
-        //await this.campeonatosScraper.scrapeCampeonatos();
+        await this.noticiasScraper.scrapeNoticias();
+        //    await this.youtubeScraper.scrapeYoutube();
+        //    await this.partidasScraper.scrapePartidas();
+        //    await this.campeonatosScraper.scrapeCampeonatos();
 
         console.log("SCRAPING CONCLUÍDO")
     }

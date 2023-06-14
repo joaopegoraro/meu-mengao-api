@@ -28,7 +28,7 @@ export class PosicaoService {
     });
   }
 
-  async findOne(id: number) {
+  async findOne(id: string) {
     return await this.posicaoRepository.findOneBy({ id });
   }
 

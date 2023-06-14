@@ -5,6 +5,7 @@ import { CampeonatosService } from '../campeonatos/campeonatos.service';
 import { Campeonato } from '../campeonatos/entities/campeonato.entity';
 import { PartidaService } from '../partida/partida.service';
 import { PosicaoService } from '../posicao/posicao.service';
+import { ImageUtils } from '../utils/image-utils';
 
 @Injectable()
 export class CampeonatosScraperService {
@@ -36,6 +37,10 @@ export class CampeonatosScraperService {
         });
         const page = await browser.newPage();
 
+        await page.goto(url, {
+            waitUntil: 'networkidle0',
+        });
+
         const campeonato = await page.evaluate(() => {
             const nome = document.querySelector(".heading__name").textContent;
             const ano = document.querySelector(".heading__info").textContent;
@@ -51,13 +56,14 @@ export class CampeonatosScraperService {
         }).then(async (campeonato) => {
             campeonato.id = url;
             campeonato.link = url;
-            //campeonato.logo = await ImageUtils.convertImageUrlToBase64(campeonato.logo, 30, 30);
+            campeonato.logo = await ImageUtils.convertImageUrlToBase64(campeonato.logo, 30, 30);
             return campeonato;
         });
 
         const savedCampeonato = await this.campeonatosService.findOne(campeonato.id);
 
-        if (campeonato.ano > savedCampeonato.ano) {
+        if (savedCampeonato.ano != null && campeonato.ano > savedCampeonato.ano) {
+            console.log("CAMPEONATO JA SALVO: " + campeonato);
             await this.posicaoService.removeWithCampeonatoId(campeonato.id);
             await this.partidasService.removeWithCampeonatoId(campeonato.id);
         }
@@ -123,7 +129,8 @@ export class CampeonatosScraperService {
             })
             .then(async (posicoes) => posicoes.map(async (posicao) => {
                 posicao.campeonatoId = campeonato.id;
-                //posicao.escudoTime = await ImageUtils.convertImageUrlToBase64(posicao.escudoTime, 20, 20);
+                posicao.id = posicao.nomeTime + posicao.classificacaoIndex + posicao.campeonatoId;
+                posicao.escudoTime = await ImageUtils.convertImageUrlToBase64(posicao.escudoTime, 20, 20);
                 return posicao;
             })
             ));
@@ -165,7 +172,7 @@ export class CampeonatosScraperService {
         startingRoundIndex: number,
     ): Promise<number> {
         const partidasWithRounds = await page
-            .evaluate(() => {
+            .evaluate((reverseRounds, startingRoundIndex) => {
                 const rounds = [...document.querySelectorAll<HTMLDivElement>(".sportName > div")]
                     .reduce<HTMLDivElement[][]>((result, value) => {
                         if (value.classList.contains("event__round")) {
@@ -216,7 +223,7 @@ export class CampeonatosScraperService {
                     roundsSize: rounds.length,
                     partidas: partidas,
                 };
-            })
+            }, reverseRounds, startingRoundIndex)
             .then(async (partidasWithRounds) => {
                 partidasWithRounds.partidas = await Promise.all(partidasWithRounds.partidas.map(async partida => {
                     partida.campeonato = campeonato.nome;
@@ -225,8 +232,8 @@ export class CampeonatosScraperService {
                     const data = moment(partida.data, "DD.MM. HH:mm").toDate() || moment(partida.data, "DD.MM.YYYY").toDate();
                     partida.data = data.getTime().toString();
 
-                    // partida.escudoCasa = await ImageUtils.convertImageUrlToBase64(partida.escudoCasa, 30, 30);
-                    // partida.escudoFora = await ImageUtils.convertImageUrlToBase64(partida.escudoFora, 30, 30);
+                    partida.escudoCasa = await ImageUtils.convertImageUrlToBase64(partida.escudoCasa, 30, 30);
+                    partida.escudoFora = await ImageUtils.convertImageUrlToBase64(partida.escudoFora, 30, 30);
                     return partida;
                 }));
 

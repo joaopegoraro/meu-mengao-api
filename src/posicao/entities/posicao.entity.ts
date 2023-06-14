@@ -3,7 +3,7 @@ import { Column, Entity, PrimaryColumn } from 'typeorm';
 @Entity()
 export class Posicao {
     @PrimaryColumn()
-    id: number;
+    id: string;
 
     @Column()
     posicao: string;

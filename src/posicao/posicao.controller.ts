@@ -24,7 +24,7 @@ export class PosicaoController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.posicaoService.findOne(+id);
+    return this.posicaoService.findOne(id);
   }
 
   @Patch(':id')

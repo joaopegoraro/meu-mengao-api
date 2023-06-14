@@ -30,7 +30,9 @@ export class NoticiasScraperService {
             ]
         });
         const page = await browser.newPage();
-        await page.goto("https://colunadofla.com/ultimas-noticias/");
+        await page.goto("https://colunadofla.com/ultimas-noticias/", {
+            waitUntil: 'networkidle0',
+        });
 
         const noticias = await Promise.all(await page
             .evaluate(() => {
@@ -74,9 +76,23 @@ export class NoticiasScraperService {
     }
 
     private async scrapeGE() {
-        const browser = await puppeteer.launch({ headless: "new" });
+        const browser = await puppeteer.launch({
+            headless: "new",
+            args: [
+                '--disable-gpu',
+                '--disable-dev-shm-usage',
+                '--disable-setuid-sandbox',
+                '--no-first-run',
+                '--no-sandbox',
+                '--no-zygote',
+                '--single-process',
+            ]
+        });
+
         const page = await browser.newPage();
-        await page.goto("https://ge.globo.com/futebol/times/flamengo/");
+        await page.goto("https://ge.globo.com/futebol/times/flamengo/", {
+            waitUntil: 'networkidle0',
+        });
 
         const noticias = await Promise.all(await page.evaluate(() => {
             const noticiasPrincipais = [...document.querySelectorAll(".bstn-hl")]
@@ -96,7 +112,7 @@ export class NoticiasScraperService {
                         titulo: title.textContent,
                         link: anchor.href,
                         site: anchor.host,
-                        data: data.getTime().toString(),
+                        data: "",
                         logoSite: "",
                         foto: imageUrl,
                     };
@@ -106,27 +122,13 @@ export class NoticiasScraperService {
                 .slice(0, 3)
                 .map((element) => {
                     const anchor = element.querySelector<HTMLAnchorElement>(".feed-post-link");
-                    const horasAtras = element.querySelector<HTMLSpanElement>(".feed-post-datetime")
-                        // "Há 7 horas" || "Ontem"
-                        .innerText
-                        .match(/\d/g)
-                        // "7" || ""
-                        .join("");
-
-                    const data = new Date(Date.now());
-                    if (horasAtras == "") {
-                        data.setHours(data.getHours() - 24);
-                    } else {
-                        data.setHours(data.getHours() - parseInt(horasAtras));
-                    }
-
                     const imageUrl = element.querySelector<HTMLImageElement>(".bstn-fd-picture-image").src;
 
                     return {
                         titulo: anchor.innerText,
                         link: anchor.href,
                         site: anchor.host,
-                        data: data.getTime().toString(),
+                        data: "",
                         logoSite: "",
                         foto: imageUrl,
                     };
@@ -140,12 +142,22 @@ export class NoticiasScraperService {
             return noticia;
         })));
 
-        await browser.close();
-
         await this.noticiasService.removeWithSite(noticias[0].site);
         for (var noticia of noticias) {
+            await page.goto(noticia.link, {
+                waitUntil: 'domcontentloaded',
+            })
+
+            const data = await page.evaluate(() => {
+                return document.querySelector<HTMLTimeElement>(".content-publication-data__updated > time").dateTime;
+            });
+
+            noticia.data = moment(data).toDate().getTime().toString();
+
             await this.noticiasService.create(noticia);
         }
+
+        await browser.close();
     }
 }
 
