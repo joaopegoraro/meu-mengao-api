@@ -12,8 +12,8 @@ export class NoticiasService {
     private noticiaRepository: Repository<Noticia>,
   ) { }
 
-  create(createNoticiaDto: CreateNoticiaDto) {
-    return this.noticiaRepository.save(createNoticiaDto);
+  async create(createNoticiaDto: CreateNoticiaDto) {
+    return await this.noticiaRepository.save(createNoticiaDto);
   }
 
   async findAll() {

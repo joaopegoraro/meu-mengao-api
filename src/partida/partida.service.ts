@@ -12,8 +12,8 @@ export class PartidaService {
     private partidaRepository: Repository<Partida>,
   ) { }
 
-  create(createPartidaDto: CreatePartidaDto) {
-    return this.partidaRepository.save(createPartidaDto);
+  async create(createPartidaDto: CreatePartidaDto) {
+    return await this.partidaRepository.save(createPartidaDto);
   }
 
   async findAll() {

@@ -8,27 +8,27 @@ export class NoticiasController {
   constructor(private readonly noticiasService: NoticiasService) { }
 
   @Post()
-  create(@Body() createNoticiaDto: CreateNoticiaDto) {
+  async create(@Body() createNoticiaDto: CreateNoticiaDto) {
     return this.noticiasService.create(createNoticiaDto);
   }
 
   @Get()
-  findAll() {
+  async findAll() {
     return this.noticiasService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
+  async findOne(@Param('id') id: string) {
     return this.noticiasService.findOne(+id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateNoticiaDto: UpdateNoticiaDto) {
+  async update(@Param('id') id: string, @Body() updateNoticiaDto: UpdateNoticiaDto) {
     return this.noticiasService.update(+id, updateNoticiaDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
+  async remove(@Param('id') id: string) {
     return this.noticiasService.remove(+id);
   }
 }

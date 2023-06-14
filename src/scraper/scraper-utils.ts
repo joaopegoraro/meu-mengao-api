@@ -30,9 +30,9 @@ export class ScraperUtils {
         const page = options.page || await browser.newPage();
         await page.goto(options.url, { waitUntil: options.waitUntil || 'networkidle0' });
 
-        const result = onScraping == null ? null : onScraping(page, browser);
+        const result = onScraping ? await onScraping(page, browser) : null;
 
-        if (browser != null && options.closeBrowserOnFinish) {
+        if (browser != null && options.closeBrowserOnFinish != false) {
             await browser.close();
         }
 

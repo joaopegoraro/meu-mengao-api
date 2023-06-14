@@ -119,13 +119,13 @@ export class PartidasScraperService {
             return campeonatosWithUrl;
         });
 
-
         for (var campeonatoWithUrl of campeonatosWithUrl) {
-            this.campeonatosService.create({
+            const newCampeonato = {
                 id: campeonatoWithUrl[1],
                 link: campeonatoWithUrl[1],
                 nome: campeonatoWithUrl[0]
-            })
+            };
+            await this.campeonatosService.create(newCampeonato)
         }
     }
 

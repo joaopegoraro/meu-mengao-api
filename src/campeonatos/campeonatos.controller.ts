@@ -8,27 +8,27 @@ export class CampeonatosController {
   constructor(private readonly campeonatosService: CampeonatosService) { }
 
   @Post()
-  create(@Body() createCampeonatoDto: CreateCampeonatoDto) {
-    return this.campeonatosService.create(createCampeonatoDto);
+  async create(@Body() createCampeonatoDto: CreateCampeonatoDto) {
+    return await this.campeonatosService.create(createCampeonatoDto);
   }
 
   @Get()
   async findAll() {
-    return this.campeonatosService.findAll();
+    return await this.campeonatosService.findAll();
   }
 
   @Get(':id')
   async findOne(@Param('id') id: string) {
-    return this.campeonatosService.findOne(id);
+    return await this.campeonatosService.findOne(id);
   }
 
   @Patch(':id')
   async update(@Param('id') id: string, @Body() updateCampeonatoDto: UpdateCampeonatoDto) {
-    return this.campeonatosService.update(+id, updateCampeonatoDto);
+    return await this.campeonatosService.update(id, updateCampeonatoDto);
   }
 
   @Delete(':id')
   async remove(@Param('id') id: string) {
-    return this.campeonatosService.remove(+id);
+    return await this.campeonatosService.remove(+id);
   }
 }

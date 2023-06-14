@@ -52,7 +52,7 @@ export class CampeonatosScraperService {
                 await this.partidasService.removeWithCampeonatoId(campeonato.id);
             }
 
-            this.campeonatosService.create(campeonato)
+            await this.campeonatosService.create(campeonato)
 
             await this.scrapePartidasForCampeonato(page, campeonato);
             await this.scrapeClassificacoesForCampeonato(page, campeonato);
@@ -129,12 +129,12 @@ export class CampeonatosScraperService {
         const resultadosUrl = campeonato.link + "resultados";
         const calendarioUrl = campeonato.link + "calendario";
 
-        await ScraperUtils.scrapePage({ url: resultadosUrl });
+        await ScraperUtils.scrapePage({ url: resultadosUrl, page: page });
 
         // Partidas da lista de resultados são dos mais recentes para os mais antigos, por isso é passado reverseRounds = true, para que a lista fique dos mais antigos para os mais novos.
         const roundLength = await this.scrapeRoundsFromPage(page, campeonato, true, 0);
 
-        await ScraperUtils.scrapePage({ url: calendarioUrl });
+        await ScraperUtils.scrapePage({ url: calendarioUrl, page: page });
 
         await this.scrapeRoundsFromPage(page, campeonato, false, roundLength);
     }

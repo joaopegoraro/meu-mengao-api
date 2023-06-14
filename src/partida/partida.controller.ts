@@ -8,17 +8,17 @@ export class PartidaController {
   constructor(private readonly partidaService: PartidaService) { }
 
   @Post()
-  create(@Body() createPartidaDto: CreatePartidaDto) {
+  async create(@Body() createPartidaDto: CreatePartidaDto) {
     return this.partidaService.create(createPartidaDto);
   }
 
   @Get()
-  findAll() {
+  async findAll() {
     return this.partidaService.findAll();
   }
 
   @Get('rodada/:campeonatoId/:rodadaIndex')
-  findAllWithRodadaId(
+  async findAllWithRodadaId(
     @Param('campeonatoId') campeonatoId: string,
     @Param('rodadaIndex') rodadaIndex: number,
   ) {
@@ -26,17 +26,17 @@ export class PartidaController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
+  async findOne(@Param('id') id: string) {
     return this.partidaService.findOne(id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updatePartidaDto: UpdatePartidaDto) {
+  async update(@Param('id') id: string, @Body() updatePartidaDto: UpdatePartidaDto) {
     return this.partidaService.update(+id, updatePartidaDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
+  async remove(@Param('id') id: string) {
     return this.partidaService.remove(+id);
   }
 }

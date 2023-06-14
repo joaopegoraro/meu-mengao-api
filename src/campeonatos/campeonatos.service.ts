@@ -12,23 +12,23 @@ export class CampeonatosService {
     private campeonatosRepository: Repository<Campeonato>,
   ) { }
 
-  create(createCampeonatoDto: CreateCampeonatoDto) {
-    this.campeonatosRepository.save(createCampeonatoDto);
+  async create(createCampeonatoDto: CreateCampeonatoDto) {
+    return await this.campeonatosRepository.save(createCampeonatoDto);
   }
 
   async findAll() {
-    return this.campeonatosRepository.find();
+    return await this.campeonatosRepository.find();
   }
 
   async findOne(id: string) {
-    return this.campeonatosRepository.findOneBy({ id });
+    return await this.campeonatosRepository.findOneBy({ id });
   }
 
-  async update(id: number, updateCampeonatoDto: UpdateCampeonatoDto) {
-    await this.campeonatosRepository.update(id, updateCampeonatoDto);
+  async update(id: string, updateCampeonatoDto: UpdateCampeonatoDto) {
+    return await this.campeonatosRepository.update(id, updateCampeonatoDto);
   }
 
   async remove(id: number) {
-    await this.campeonatosRepository.delete(id);
+    return await this.campeonatosRepository.delete(id);
   }
 }
