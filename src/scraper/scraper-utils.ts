@@ -3,7 +3,7 @@ import puppeteer, { Browser, Page, PuppeteerLaunchOptions, PuppeteerLifeCycleEve
 export class ScraperUtils {
     static async scrapePage<T>(
         options: {
-            url: string,
+            url?: string,
             browser?: Browser,
             page?: Page,
             launchOptions?: PuppeteerLaunchOptions,
@@ -15,7 +15,7 @@ export class ScraperUtils {
         onScraping?: (page: Page, browser?: Browser) => Promise<T>,
     ): Promise<T> {
         const browser = options.page != null ? null : (options.browser || await puppeteer.launch(options.launchOptions || {
-            headless: options.headless || 'new',
+            headless: options.headless != null ? options.headless : 'new',
             args: options.args || [
                 '--disable-gpu',
                 '--disable-dev-shm-usage',
@@ -29,8 +29,9 @@ export class ScraperUtils {
 
         const page = options.page || await browser.newPage();
 
-        await page.goto(options.url, { waitUntil: options.waitUntil || 'networkidle0' });
-        console.log("INDO PARA " + options.url);
+        if (options.url) {
+            await page.goto(options.url, { waitUntil: options.waitUntil || ['networkidle0', 'domcontentloaded'] }).catch(e => null);
+        }
 
         const result = onScraping ? await onScraping(page, browser) : null;
 

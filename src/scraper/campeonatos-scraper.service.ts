@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import moment from 'moment';
-import { Page } from 'puppeteer';
+import { ElementHandle, Page } from 'puppeteer';
 import { CampeonatosService } from '../campeonatos/campeonatos.service';
 import { Campeonato } from '../campeonatos/entities/campeonato.entity';
 import { PartidaService } from '../partida/partida.service';
@@ -19,15 +19,95 @@ export class CampeonatosScraperService {
     private readonly logger = new Logger(CampeonatosScraperService.name);
 
     async scrapeCampeonatos() {
-        const campeonatos = await this.campeonatosService.findAll();
-        for (var campeonato of campeonatos) {
-            await this.scrapeCampeonato(campeonato);
+        await ScraperUtils.scrapePage({}, async (page) => {
+            await this.scrapeCampeonatosUrlsFromUrl({
+                url: "https://www.flashscore.com.br/equipe/flamengo/WjxY29qB/resultados/",
+                page: page,
+            });
+            await this.scrapeCampeonatosUrlsFromUrl({
+                url: "https://www.flashscore.com.br/equipe/flamengo/WjxY29qB/calendario/",
+                page: page,
+            });
+            const campeonatos = await this.campeonatosService.findAll();
+            for (var campeonato of campeonatos) {
+                await this.scrapeCampeonato({
+                    campeonatoToScrape: campeonato,
+                    page: page,
+                });
+            }
+        });
+    }
+
+    private async scrapeCampeonatosUrlsFromUrl(options: {
+        page: Page,
+        url: string,
+    }) {
+        try {
+            const campeonatosWithUrl = await ScraperUtils.scrapePage({ url: options.url, page: options.page }, async (page) => {
+
+                const cookieConsentButton = await options.page.$("#onetrust-accept-btn-handler");
+                if (cookieConsentButton) {
+                    await Promise.all([
+                        options.page.evaluate((consentButton: HTMLElement) => consentButton.click(), cookieConsentButton).catch(e => null),
+                        page.waitForNavigation({ waitUntil: ['networkidle0', 'domcontentloaded'] }).catch(e => null),
+                    ]);
+                }
+
+                const campeonatosWithUrl = new Map<string, { id: string, url: string }>();
+                let links = await ((await page.$(".sportName")).$$(".event__title--name"))
+                for (let i = 0; i < links.length; i++) {
+                    const link = links[i];
+
+                    const campeonato = (await (await link.getProperty("innerText")).jsonValue()).toString();
+
+                    if (![...campeonatosWithUrl.keys()].includes(campeonato)) {
+                        await Promise.all([
+                            page.waitForNavigation(),
+                            page.evaluate((el: HTMLSpanElement) => el.click(), link),
+                        ])
+
+                        const url = page.url();
+                        const id = new URL(url).pathname.split('/').filter(Boolean).pop();
+                        campeonatosWithUrl.set(campeonato, { id, url });
+
+                        await Promise.all([
+                            page.waitForNavigation(),
+                            page.goBack(),
+                        ]);
+
+                        links = await ((await page.$(".sportName")).$$(".event__title--name"))
+                    }
+                }
+
+                return campeonatosWithUrl;
+            });
+
+            for (var campeonatoWithUrl of campeonatosWithUrl) {
+                const campeonatoData = campeonatoWithUrl[1]
+                const campeonatoNome = campeonatoWithUrl[0]
+                const newCampeonato = {
+                    id: campeonatoData.id,
+                    link: campeonatoData.url,
+                    nome: campeonatoNome,
+                };
+                await this.campeonatosService.create(newCampeonato)
+            }
+        } catch (e: unknown) {
+            const message = `Erro ao tentar fazer scraping da url ${options.url}: `
+            if (e instanceof Error) {
+                this.logger.error(message + e.message, e.stack)
+            } else {
+                this.logger.error(message + e)
+            }
         }
     }
 
-    private async scrapeCampeonato(campeonatoToScrape: Campeonato) {
+    private async scrapeCampeonato(options: {
+        campeonatoToScrape: Campeonato,
+        page: Page,
+    }) {
         try {
-            await ScraperUtils.scrapePage({ url: campeonatoToScrape.link, headless: false }, async (page) => {
+            await ScraperUtils.scrapePage({ url: options.campeonatoToScrape.link, page: options.page }, async (page) => {
 
                 const campeonato = await page.evaluate(() => {
                     const nome = document.querySelector(".heading__name").textContent;
@@ -42,8 +122,8 @@ export class CampeonatosScraperService {
                         logo: urlImagem,
                     };
                 }).then(async (scrapedCampeonato) => {
-                    scrapedCampeonato.id = campeonatoToScrape.id;
-                    scrapedCampeonato.link = campeonatoToScrape.link;
+                    scrapedCampeonato.id = options.campeonatoToScrape.id;
+                    scrapedCampeonato.link = options.campeonatoToScrape.link;
                     scrapedCampeonato.logo = await ImageUtils.convertImageUrlToBase64(scrapedCampeonato.logo, 30, 30);
                     return scrapedCampeonato;
                 });
@@ -70,7 +150,7 @@ export class CampeonatosScraperService {
                 });
             });
         } catch (e: unknown) {
-            const message = `Exception ao tentar fazer scraping do campeonato ${campeonatoToScrape.id} (${campeonatoToScrape.nome}): `
+            const message = `Exception ao tentar fazer scraping do campeonato ${options.campeonatoToScrape.id} (${options.campeonatoToScrape.nome}): `
             if (e instanceof Error) {
                 this.logger.error(message + e.message, e.stack)
             } else {
@@ -189,6 +269,22 @@ export class CampeonatosScraperService {
         reverseRounds: boolean,
         startingRoundIndex: number,
     }): Promise<number> {
+
+        const cookieConsentButton = await options.page.$("#onetrust-accept-btn-handler");
+        if (cookieConsentButton) {
+            await Promise.all([
+                options.page.evaluate((consentButton: HTMLElement) => consentButton.click(), cookieConsentButton).catch(e => null),
+                options.page.waitForNavigation({ waitUntil: ['networkidle0', 'domcontentloaded'] }).catch(e => null),
+            ]);
+        }
+
+        for (var moreButton: ElementHandle<Element>; moreButton = await options.page.$(".event__more");) {
+            await Promise.all([
+                options.page.evaluate((moreButton: HTMLAnchorElement) => moreButton.click(), moreButton).catch(e => null),
+                options.page.waitForNavigation({ waitUntil: ['networkidle0', 'domcontentloaded'] }).catch(e => null),
+            ]);
+        }
+
         const partidasWithRounds = await options.page
             .evaluate((reverseRounds, startingRoundIndex) => {
                 const rounds = [...document.querySelectorAll<HTMLDivElement>(".sportName > div")]

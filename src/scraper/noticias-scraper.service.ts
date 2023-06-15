@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import moment from 'moment';
+import { Page } from 'puppeteer';
 import { NoticiasService } from '../noticias/noticias.service';
 import { ImageUtils } from '../utils/image-utils';
 import { ScraperUtils } from './scraper-utils';
@@ -13,13 +14,15 @@ export class NoticiasScraperService {
     private readonly logger = new Logger(NoticiasScraperService.name);
 
     async scrapeNoticias() {
-        await this.scrapeGE();
-        await this.scrapeColunaDoFla();
+        await ScraperUtils.scrapePage({}, async (page) => {
+            await this.scrapeGE(page);
+            await this.scrapeColunaDoFla(page);
+        });
     }
 
-    private async scrapeColunaDoFla() {
+    private async scrapeColunaDoFla(page: Page) {
         try {
-            const noticias = await ScraperUtils.scrapePage({ url: "https://colunadofla.com/ultimas-noticias/" }, async (page) => {
+            const noticias = await ScraperUtils.scrapePage({ url: "https://colunadofla.com/ultimas-noticias/", page }, async (page) => {
                 return await Promise.all(await page
                     .evaluate(() => {
                         return [...document.querySelectorAll(".post")]
@@ -69,9 +72,9 @@ export class NoticiasScraperService {
     }
 
 
-    private async scrapeGE() {
+    private async scrapeGE(page: Page) {
         try {
-            return await ScraperUtils.scrapePage({ url: "https://ge.globo.com/futebol/times/flamengo/" }, async (page) => {
+            return await ScraperUtils.scrapePage({ url: "https://ge.globo.com/futebol/times/flamengo/", page }, async (page) => {
                 const noticias = await Promise.all(await page.evaluate(() => {
                     const noticiasPrincipais = [...document.querySelectorAll(".bstn-hl")]
                         .filter((element) => {
@@ -103,6 +106,7 @@ export class NoticiasScraperService {
 
                     const noticiasSecundarias = [...document.querySelectorAll(".feed-post-body")]
                         .slice(0, 3)
+                        .filter((element) => !element.querySelector<HTMLAnchorElement>(".feed-post-link").getAttribute("data-video-id"))
                         .map((element) => {
                             const anchor = element.querySelector<HTMLAnchorElement>(".feed-post-link");
                             const imageUrl = element.querySelector<HTMLImageElement>(".bstn-fd-picture-image").src;
