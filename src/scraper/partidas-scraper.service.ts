@@ -65,8 +65,8 @@ export class PartidasScraperService {
                                         return {
                                             id: element.id,
                                             data: dataText,
-                                            timeCasa: timeCasa,
-                                            timeFora: timeFora,
+                                            timeCasa: timeCasa.includes("Flamengo") ? "Flamengo" : timeCasa,
+                                            timeFora: timeFora.includes("Flamengo") ? "Flamengo" : timeFora,
                                             golsCasa: golsCasa,
                                             golsFora: golsFora,
                                             campeonato: campeonato,

@@ -16,7 +16,7 @@ export class PartidaService {
   }
 
   async findProximaPartida() {
-    return await this.partidaRepository.find({
+    return await this.partidaRepository.findOne({
       where: {
         partidaFlamengo: true,
         data: MoreThanOrEqual(Date.now().toString()),
@@ -24,7 +24,6 @@ export class PartidaService {
       order: {
         data: "ASC",
       },
-      take: 1
     });
   }
 
@@ -33,7 +32,10 @@ export class PartidaService {
       where: {
         partidaFlamengo: true,
         data: LessThan(Date.now().toString()),
-      }
+      },
+      order: {
+        data: "DESC",
+      },
     });
   }
 
@@ -42,7 +44,10 @@ export class PartidaService {
       where: {
         partidaFlamengo: true,
         data: MoreThanOrEqual(Date.now().toString()),
-      }
+      },
+      order: {
+        data: "ASC",
+      },
     });
   }
 

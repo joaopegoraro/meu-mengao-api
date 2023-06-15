@@ -16,7 +16,11 @@ export class NoticiasService {
   }
 
   async findAll() {
-    return await this.noticiaRepository.find();
+    return await this.noticiaRepository.find({
+      order: {
+        data: 'DESC'
+      }
+    });
   }
 
   async removeWithSite(site: string) {
