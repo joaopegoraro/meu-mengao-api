@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateCampeonatoDto } from './dto/create-campeonato.dto';
+import { UpdateCampeonatoDto } from './dto/update-campeonato.dto';
 import { Campeonato } from './entities/campeonato.entity';
 
 @Injectable()
@@ -13,6 +14,10 @@ export class CampeonatosService {
 
   async create(createCampeonatoDto: CreateCampeonatoDto) {
     return await this.campeonatosRepository.save(createCampeonatoDto);
+  }
+
+  async update(id: string, updateCampeonatoDto: UpdateCampeonatoDto) {
+    return await this.campeonatosRepository.update(id, updateCampeonatoDto);
   }
 
   async findAll() {

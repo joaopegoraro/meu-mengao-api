@@ -40,8 +40,8 @@ export class YoutubeScraperService {
             const response = await axios.get(invidiousUrl + channelId)
             const video = response.data["latestVideos"][0];
 
-            // Thumbnail 5 é a 'default', de tamanho 120x90
-            const thumbnail = video["videoThumbnails"][5];
+            // Thumbnail 5 é a 'high', de tamanho 480x360
+            const thumbnail = video["videoThumbnails"][4];
 
             // Thumbnail do autor 2 tem tamanho 76x76
             const logo = response.data["authorThumbnails"][2];
@@ -52,7 +52,7 @@ export class YoutubeScraperService {
                 site: video["author"],
                 data: video["published"],
                 logoSite: await ImageUtils.convertImageUrlToBase64(logo["url"], 76, 76),
-                foto: await ImageUtils.convertImageUrlToBase64(thumbnail["url"], 120, 90),
+                foto: await ImageUtils.convertImageUrlToBase64(thumbnail["url"], 350, 250),
             };
 
             await this.noticiasService.removeWithSite(noticia.site);

@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreatePosicaoDto } from './dto/create-posicao.dto';
-import { UpdatePosicaoDto } from './dto/update-posicao.dto';
 import { Posicao } from './entities/posicao.entity';
 
 @Injectable()
@@ -20,7 +19,7 @@ export class PosicaoService {
     return await this.posicaoRepository.find({
       where: {
         campeonatoId: campeonatoId
-      },
+      }
     });
   }
 

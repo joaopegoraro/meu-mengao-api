@@ -30,6 +30,7 @@ export class ScraperUtils {
         const page = options.page || await browser.newPage();
 
         await page.goto(options.url, { waitUntil: options.waitUntil || 'networkidle0' });
+        console.log("INDO PARA " + options.url);
 
         const result = onScraping ? await onScraping(page, browser) : null;
 

@@ -16,4 +16,7 @@ export class Campeonato {
 
     @Column({ nullable: true, type: 'text' })
     logo: string;
+
+    @Column({ default: false })
+    possuiClassificacao: boolean;
 }

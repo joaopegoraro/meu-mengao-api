@@ -57,8 +57,17 @@ export class CampeonatosScraperService {
 
                 await this.campeonatosService.create(campeonato)
 
-                await this.scrapePartidasForCampeonato(page, campeonato);
-                await this.scrapeClassificacoesForCampeonato(page, campeonato);
+                await this.scrapePartidasForCampeonato({
+                    page: page,
+                    campeonatoId: campeonato.id,
+                    nomeCampeonato: campeonato.nome,
+                    linkCampeonato: campeonato.link,
+                });
+                await this.scrapeClassificacoesForCampeonato({
+                    page: page,
+                    campeonatoId: campeonato.id,
+                    campeonatoLink: campeonato.link
+                });
             });
         } catch (e: unknown) {
             const message = `Exception ao tentar fazer scraping do campeonato ${campeonatoToScrape.id} (${campeonatoToScrape.nome}): `
@@ -70,13 +79,14 @@ export class CampeonatosScraperService {
         }
     }
 
-    private async scrapeClassificacoesForCampeonato(
+    private async scrapeClassificacoesForCampeonato(options: {
         page: Page,
-        campeonato: Campeonato,
-    ) {
-        const classificacaoUrl = campeonato.link + "classificacao";
+        campeonatoLink: string,
+        campeonatoId: string,
+    }) {
+        const classificacaoUrl = options.campeonatoLink + "classificacao";
 
-        await ScraperUtils.scrapePage({ url: classificacaoUrl, page: page }, async (page) => {
+        await ScraperUtils.scrapePage({ url: classificacaoUrl, page: options.page }, async (page) => {
             const posicoes = await Promise.all(await page
                 .evaluate(() => {
                     return [...document.querySelectorAll<HTMLDivElement>(".ui-table")]
@@ -101,7 +111,7 @@ export class CampeonatosScraperService {
 
                                 return {
                                     id: "",
-                                    posicao: posicao,
+                                    posicao: posicao.replace(/\D/g, ""),
                                     nomeTime: nomeTime.includes("Flamengo") ? "Flamengo" : nomeTime,
                                     escudoTime: escudoUrl,
                                     pontos: pontos,
@@ -120,12 +130,16 @@ export class CampeonatosScraperService {
                         });
                 })
                 .then(async (posicoes) => posicoes.map(async (posicao) => {
-                    posicao.campeonatoId = campeonato.id;
+                    posicao.campeonatoId = options.campeonatoId;
                     posicao.id = posicao.nomeTime + posicao.classificacaoIndex + posicao.campeonatoId;
                     posicao.escudoTime = await ImageUtils.convertImageUrlToBase64(posicao.escudoTime, 20, 20);
                     return posicao;
                 })
                 ));
+
+            if (posicoes.length > 0) {
+                await this.campeonatosService.update(options.campeonatoId, { possuiClassificacao: true });
+            }
 
             for (var posicao of posicoes) {
                 await this.posicaoService.create(posicao);
@@ -133,34 +147,49 @@ export class CampeonatosScraperService {
         })
     }
 
-    private async scrapePartidasForCampeonato(
+    private async scrapePartidasForCampeonato(options: {
+        linkCampeonato: string,
+        campeonatoId: string,
+        nomeCampeonato: string,
         page: Page,
-        campeonato: Campeonato,
-    ) {
-        const resultadosUrl = campeonato.link + "resultados";
-        const calendarioUrl = campeonato.link + "calendario";
+    }) {
+        const resultadosUrl = options.linkCampeonato + "resultados";
+        const calendarioUrl = options.linkCampeonato + "calendario";
 
-        await ScraperUtils.scrapePage({ url: resultadosUrl, page: page });
+        await ScraperUtils.scrapePage({ url: resultadosUrl, page: options.page });
 
         // Partidas da lista de resultados são dos mais recentes para os mais antigos, por isso é passado reverseRounds = true, para que a lista fique dos mais antigos para os mais novos.
-        const roundLength = await this.scrapeRoundsFromPage(page, campeonato, true, 0);
+        const roundLength = await this.scrapeRoundsFromPage({
+            page: options.page,
+            campeonatoId: options.campeonatoId,
+            nomeCampeonato: options.nomeCampeonato,
+            reverseRounds: true,
+            startingRoundIndex: 0,
+        });
 
-        await ScraperUtils.scrapePage({ url: calendarioUrl, page: page });
+        await ScraperUtils.scrapePage({ url: calendarioUrl, page: options.page });
 
-        await this.scrapeRoundsFromPage(page, campeonato, false, roundLength);
+        await this.scrapeRoundsFromPage({
+            page: options.page,
+            campeonatoId: options.campeonatoId,
+            nomeCampeonato: options.nomeCampeonato,
+            reverseRounds: false,
+            startingRoundIndex: roundLength,
+        });
     }
 
 
     /**
      * Faz o scrape das rodadas na página, e retorna o número de rodadas salvas
      */
-    private async scrapeRoundsFromPage(
+    private async scrapeRoundsFromPage(options: {
         page: Page,
-        campeonato: Campeonato,
+        campeonatoId: string,
+        nomeCampeonato: string,
         reverseRounds: boolean,
         startingRoundIndex: number,
-    ): Promise<number> {
-        const partidasWithRounds = await page
+    }): Promise<number> {
+        const partidasWithRounds = await options.page
             .evaluate((reverseRounds, startingRoundIndex) => {
                 const rounds = [...document.querySelectorAll<HTMLDivElement>(".sportName > div")]
                     .reduce<HTMLDivElement[][]>((result, value) => {
@@ -212,11 +241,11 @@ export class CampeonatosScraperService {
                     roundsSize: rounds.length,
                     partidas: partidas,
                 };
-            }, reverseRounds, startingRoundIndex)
+            }, options.reverseRounds, options.startingRoundIndex)
             .then(async (partidasWithRounds) => {
                 partidasWithRounds.partidas = await Promise.all(partidasWithRounds.partidas.map(async partida => {
-                    partida.campeonato = campeonato.nome;
-                    partida.campeonatoId = campeonato.id;
+                    partida.campeonato = options.nomeCampeonato;
+                    partida.campeonatoId = options.campeonatoId;
 
                     const data = moment(partida.data, "DD.MM. HH:mm").toDate() || moment(partida.data, "DD.MM.YYYY").toDate();
                     partida.data = data.getTime().toString();
