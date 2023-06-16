@@ -15,6 +15,10 @@ export class ScraperService {
 
     private readonly logger = new Logger(ScraperService.name);
 
+    onModuleInit() {
+        this.scrapeData();
+    }
+
     @Cron(CronExpression.EVERY_HOUR)
     async scrapeData(): Promise<void> {
         try {

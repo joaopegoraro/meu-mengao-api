@@ -21,7 +21,7 @@ export class AuthMiddleware implements NestMiddleware {
 
   private readonly logger = new Logger(AuthMiddleware.name);
 
-  private defaultApp: any;
+  private defaultApp: firebase.app.App;
 
 
   constructor() {

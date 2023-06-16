@@ -301,7 +301,7 @@ export class CampeonatosScraperService {
                 if (reverseRounds) rounds.reverse();
 
                 const partidas = rounds.flatMap((chunk, index) => {
-                    const roundName = chunk[0].innerText;
+                    const roundName = chunk[0].innerHTML;
                     const roundIndex = index + startingRoundIndex;
 
                     return chunk
@@ -327,8 +327,8 @@ export class CampeonatosScraperService {
                                 partidaFlamengo: [timeCasa, timeFora].some(time => time.includes("Flamengo")),
                                 escudoCasa: escudoCasaUrl,
                                 escudoFora: escudoForaUrl,
-                                roundIndex: roundIndex,
-                                roundName: roundName,
+                                rodadaName: roundName,
+                                rodadaIndex: roundIndex,
                             }
                         });
                 });
