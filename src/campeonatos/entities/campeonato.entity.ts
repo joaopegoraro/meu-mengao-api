@@ -19,4 +19,7 @@ export class Campeonato {
 
     @Column({ default: false })
     possuiClassificacao: boolean;
+
+    @Column({ default: 0 })
+    rodadaAtual: number;
 }

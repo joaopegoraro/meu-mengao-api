@@ -247,15 +247,29 @@ export class CampeonatosScraperService {
             startingRoundIndex: 0,
         });
 
+        const currentRound = roundLength - 1;
+        if (currentRound >= 0) {
+            await this.campeonatosService.update(options.campeonatoId, {
+                rodadaAtual: currentRound,
+            });
+        }
+
         await ScraperUtils.scrapePage({ url: calendarioUrl, page: options.page });
 
-        await this.scrapeRoundsFromPage({
+        const finalRoundLenght = await this.scrapeRoundsFromPage({
             page: options.page,
             campeonatoId: options.campeonatoId,
             nomeCampeonato: options.nomeCampeonato,
             reverseRounds: false,
             startingRoundIndex: roundLength,
         });
+
+        if (finalRoundLenght > 0) {
+            await this.campeonatosService.update(options.campeonatoId, {
+                rodadaAtual: currentRound + 1,
+            });
+        }
+
     }
 
 
