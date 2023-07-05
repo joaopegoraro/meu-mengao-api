@@ -22,6 +22,7 @@
   "dependencies": {
     "@nestjs/axios": "^2.0.0",
     "@nestjs/common": "^9.0.0",
+    "@nestjs/config": "^3.0.0",
     "@nestjs/core": "^9.0.0",
     "@nestjs/mapped-types": "*",
     "@nestjs/platform-express": "^9.0.0",
@@ -31,13 +32,13 @@
     "firebase-admin": "^11.9.0",
     "install": "^0.13.0",
     "moment": "^2.29.4",
-    "mysql2": "^3.3.3",
     "nest-puppeteer": "^1.1.1",
     "npm": "^9.7.1",
     "puppeteer": "^20.5.0",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.2.0",
     "sharp": "^0.32.1",
+    "sqlite3": "^5.1.6",
     "typeorm": "^0.3.16"
   },
   "devDependencies": {

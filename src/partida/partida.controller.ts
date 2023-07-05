@@ -1,42 +1,99 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
-import { CreatePartidaDto } from './dto/create-partida.dto';
-import { UpdatePartidaDto } from './dto/update-partida.dto';
+import { BadRequestException, Controller, Get, Logger, NotFoundException, Param } from '@nestjs/common';
 import { PartidaService } from './partida.service';
 
-@Controller('partida')
+@Controller('partidas')
 export class PartidaController {
   constructor(private readonly partidaService: PartidaService) { }
 
-  @Post()
-  create(@Body() createPartidaDto: CreatePartidaDto) {
-    return this.partidaService.create(createPartidaDto);
+  private readonly logger = new Logger(PartidaController.name);
+
+  @Get('proxima')
+  async findProximaPartida() {
+    try {
+      const proximaPartida = await this.partidaService.findProximaPartida();
+      if (!proximaPartida) {
+        throw new NotFoundException("Não foi encontrada nenhuma partida");
+      }
+      return proximaPartida;
+
+    } catch (e: unknown) {
+      this.logger.error(e)
+      throw e;
+    }
   }
 
-  @Get()
-  findAll() {
-    return this.partidaService.findAll();
+  @Get('resultados')
+  async findResultados() {
+    try {
+      const resultados = await this.partidaService.findResultados();
+      if (!resultados || resultados.length == 0) {
+        throw new NotFoundException("Não foi encontrado nenhum resultado");
+      }
+      return resultados;
+
+    } catch (e: unknown) {
+      this.logger.error(e)
+      throw e;
+    }
   }
 
-  @Get('rodada/:campeonatoId/:rodadaIndex')
-  findAllWithRodadaId(
+  @Get('calendario')
+  async findCalendario() {
+    try {
+      const calendario = await this.partidaService.findCalendario();
+      if (!calendario || calendario.length == 0) {
+        throw new NotFoundException("Não foi encontrado nenhuma partida");
+      }
+      return calendario;
+
+    } catch (e: unknown) {
+      this.logger.error(e)
+      throw e;
+    }
+  }
+
+  @Get('campeonato/:campeonatoId/:rodadaIndex')
+  async findAllWithRodadaIndex(
     @Param('campeonatoId') campeonatoId: string,
     @Param('rodadaIndex') rodadaIndex: number,
   ) {
-    return this.partidaService.findWithRodadaIndex(campeonatoId, rodadaIndex);
+    try {
+      if (!campeonatoId) {
+        throw new BadRequestException("O campeonatoId precisa ser um id válido");
+      } else if (!rodadaIndex) {
+        throw new BadRequestException("A rodadaIndex precisa ser um index válido");
+      }
+
+      const partidas = await this.partidaService.findWithRodadaIndex(campeonatoId, rodadaIndex);
+      if (!partidas || partidas.length == 0) {
+        throw new NotFoundException("Não foi encontrado nenhuma partida");
+      }
+      return partidas;
+
+    } catch (e: unknown) {
+      this.logger.error(e)
+      throw e;
+    }
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.partidaService.findOne(id);
-  }
+  @Get('campeonato/:campeonatoId')
+  async findAllWithCampeonatoId(
+    @Param('campeonatoId') campeonatoId: string,
+  ) {
+    try {
+      if (!campeonatoId) {
+        throw new BadRequestException("O campeonatoId precisa ser um id válido");
+      }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updatePartidaDto: UpdatePartidaDto) {
-    return this.partidaService.update(+id, updatePartidaDto);
-  }
+      const partidas = await this.partidaService.findWithCampeonatoId(campeonatoId);
+      if (!partidas || partidas.length == 0) {
+        throw new NotFoundException("Não foi encontrado nenhuma partida");
+      }
+      return partidas;
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.partidaService.remove(+id);
+    } catch (e: unknown) {
+      this.logger.error(e)
+      throw e;
+    }
   }
 }

@@ -1,34 +1,25 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
-import { CreateNoticiaDto } from './dto/create-noticia.dto';
-import { UpdateNoticiaDto } from './dto/update-noticia.dto';
+import { Controller, Get, Logger, NotFoundException } from '@nestjs/common';
 import { NoticiasService } from './noticias.service';
 
 @Controller('noticias')
 export class NoticiasController {
   constructor(private readonly noticiasService: NoticiasService) { }
 
-  @Post()
-  create(@Body() createNoticiaDto: CreateNoticiaDto) {
-    return this.noticiasService.create(createNoticiaDto);
-  }
+  private readonly logger = new Logger(NoticiasController.name);
 
   @Get()
-  findAll() {
-    return this.noticiasService.findAll();
-  }
+  async findAll() {
+    try {
+      const noticias = await this.noticiasService.findAll();
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.noticiasService.findOne(+id);
-  }
+      if (!noticias || noticias.length == 0) {
+        throw new NotFoundException("Não foi encontrado nenhuma notícia");
+      }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateNoticiaDto: UpdateNoticiaDto) {
-    return this.noticiasService.update(+id, updateNoticiaDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.noticiasService.remove(+id);
+      return noticias;
+    } catch (e: unknown) {
+      this.logger.error(e)
+      throw e;
+    }
   }
 }

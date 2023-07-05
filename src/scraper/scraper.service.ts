@@ -1,8 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
+import moment from 'moment';
 import { CampeonatosScraperService } from './campeonatos-scraper.service';
 import { NoticiasScraperService } from './noticias-scraper.service';
-import { PartidasScraperService } from './partidas-scraper.service';
 import { YoutubeScraperService } from './youtube-scraper.service';
 
 @Injectable()
@@ -10,18 +10,32 @@ export class ScraperService {
     constructor(
         private readonly noticiasScraper: NoticiasScraperService,
         private readonly youtubeScraper: YoutubeScraperService,
-        private readonly partidasScraper: PartidasScraperService,
         private readonly campeonatosScraper: CampeonatosScraperService,
     ) { }
 
-    @Cron(CronExpression.EVERY_HOUR)
-    async scrapeData() {
-        await this.noticiasScraper.scrapeNoticias();
-        await this.youtubeScraper.scrapeYoutube();
-        await this.partidasScraper.scrapePartidas();
-        await this.campeonatosScraper.scrapeCampeonatos();
+    private readonly logger = new Logger(ScraperService.name);
 
-        console.log("SCRAPING CONCLUÍDO")
+    onModuleInit() {
+        this.scrapeData();
+    }
+
+    @Cron(CronExpression.EVERY_HOUR)
+    async scrapeData(): Promise<void> {
+        try {
+            this.logger.log(`SCRAPING INICIADO (${moment().format()})`)
+
+            await this.noticiasScraper.scrapeNoticias();
+            await this.youtubeScraper.scrapeYoutube();
+            await this.campeonatosScraper.scrapeCampeonatos();
+
+            this.logger.log(`SCRAPING CONCLUÍDO (${moment().format()})`)
+        } catch (e: unknown) {
+            if (e instanceof Error) {
+                this.logger.error(e.message, e.stack)
+            } else {
+                this.logger.error(e)
+            }
+        }
     }
 }
 

@@ -1,4 +1,5 @@
 import { MiddlewareConsumer, Module, RequestMethod } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthMiddleware } from './auth/auth.middleware';
@@ -14,22 +15,25 @@ import { ScraperModule } from './scraper/scraper.module';
 
 @Module({
   imports: [
+    ConfigModule.forRoot(),
     ScheduleModule.forRoot(),
-    TypeOrmModule.forRoot({
-      type: 'mysql',
-      host: 'localhost',
-      port: 3306,
-      username: 'root',
-      password: 'root',
-      database: 'meumengao',
-      autoLoadEntities: true,
-      entities: [
-        Campeonato,
-        Noticia,
-        Partida,
-        Posicao,
-      ],
-      synchronize: true,
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => {
+        return {
+          type: "sqlite",
+          database: "db.sqlite3",
+          autoLoadEntities: true,
+          entities: [
+            Campeonato,
+            Noticia,
+            Partida,
+            Posicao,
+          ],
+          synchronize: true,
+        };
+      },
     }),
     CampeonatosModule,
     PosicaoModule,

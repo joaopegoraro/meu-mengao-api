@@ -1,34 +1,26 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
+import { Controller, Get, Logger, NotFoundException } from '@nestjs/common';
 import { CampeonatosService } from './campeonatos.service';
-import { CreateCampeonatoDto } from './dto/create-campeonato.dto';
-import { UpdateCampeonatoDto } from './dto/update-campeonato.dto';
 
 @Controller('campeonatos')
 export class CampeonatosController {
   constructor(private readonly campeonatosService: CampeonatosService) { }
 
-  @Post()
-  create(@Body() createCampeonatoDto: CreateCampeonatoDto) {
-    return this.campeonatosService.create(createCampeonatoDto);
-  }
+  private readonly logger = new Logger(CampeonatosController.name);
 
   @Get()
   async findAll() {
-    return this.campeonatosService.findAll();
-  }
+    try {
+      const campeonatos = await this.campeonatosService.findAll();
 
-  @Get(':id')
-  async findOne(@Param('id') id: string) {
-    return this.campeonatosService.findOne(id);
-  }
+      if (!campeonatos || campeonatos.length == 0) {
+        const err = new NotFoundException("Não foi encontrado nenhum campeonato");
+        throw err;
+      }
 
-  @Patch(':id')
-  async update(@Param('id') id: string, @Body() updateCampeonatoDto: UpdateCampeonatoDto) {
-    return this.campeonatosService.update(+id, updateCampeonatoDto);
-  }
-
-  @Delete(':id')
-  async remove(@Param('id') id: string) {
-    return this.campeonatosService.remove(+id);
+      return campeonatos;
+    } catch (e: unknown) {
+      this.logger.error(e)
+      throw e;
+    }
   }
 }
