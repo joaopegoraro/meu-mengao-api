@@ -324,10 +324,10 @@ export class CampeonatosScraperService {
                             const dataText = element.querySelector(".event__time").textContent;
                             const timeCasa = element.querySelector(".event__participant--home").textContent;
                             const timeFora = element.querySelector(".event__participant--away").textContent;
-                            const golsCasa = element.querySelector(".event__score--home").textContent;
-                            const golsFora = element.querySelector(".event__score--away").textContent;
-                            const escudoCasaUrl = element.querySelector<HTMLImageElement>(".event__logo--home").src;
-                            const escudoForaUrl = element.querySelector<HTMLImageElement>(".event__logo--away").src;
+                            const golsCasa = element.querySelector(".event__score--home")?.textContent ?? "";
+                            const golsFora = element.querySelector(".event__score--away")?.textContent ?? "";
+                            const escudoCasaUrl = element.querySelector<HTMLImageElement>(".event__logo--home")?.src ?? "";
+                            const escudoForaUrl = element.querySelector<HTMLImageElement>(".event__logo--away")?.src ?? "";
 
                             return {
                                 id: element.id,
