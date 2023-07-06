@@ -24,8 +24,8 @@ export class ScraperService {
         try {
             this.logger.log(`SCRAPING INICIADO (${moment().format()})`)
 
-         //   await this.noticiasScraper.scrapeNoticias();
-         //   await this.youtubeScraper.scrapeYoutube();
+            await this.noticiasScraper.scrapeNoticias();
+            await this.youtubeScraper.scrapeYoutube();
             await this.campeonatosScraper.scrapeCampeonatos();
 
             this.logger.log(`SCRAPING CONCLUÍDO (${moment().format()})`)
