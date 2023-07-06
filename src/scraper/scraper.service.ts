@@ -19,7 +19,7 @@ export class ScraperService {
         this.scrapeData();
     }
 
-    @Cron(CronExpression.EVERY_HOUR)
+    @Cron(CronExpression.EVERY_3_HOURS)
     async scrapeData(): Promise<void> {
         try {
             this.logger.log(`SCRAPING INICIADO (${moment().format()})`)

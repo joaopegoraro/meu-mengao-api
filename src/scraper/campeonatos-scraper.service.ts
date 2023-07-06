@@ -62,8 +62,8 @@ export class CampeonatosScraperService {
 
                     if (![...campeonatosWithUrl.keys()].includes(campeonato)) {
                         await Promise.all([
-                            page.waitForNavigation(),
                             page.evaluate((el: HTMLSpanElement) => el.click(), link),
+                            page.waitForNavigation(),
                         ])
 
                         const url = page.url();
@@ -71,8 +71,8 @@ export class CampeonatosScraperService {
                         campeonatosWithUrl.set(campeonato, { id, url });
 
                         await Promise.all([
-                            page.waitForNavigation(),
                             page.goBack(),
+                            page.waitForNavigation(),
                         ]);
 
                         links = await ((await page.$(".sportName")).$$(".event__title--name"))
@@ -164,7 +164,36 @@ export class CampeonatosScraperService {
         campeonatoLink: string,
         campeonatoId: string,
     }) {
-        const classificacaoUrl = options.campeonatoLink + "classificacao";
+        const baseClassificacaoUrl = options.campeonatoLink + "classificacao";
+        const classificacaoUrl = await ScraperUtils.scrapePage({ url: baseClassificacaoUrl, page: options.page }, async (page) => {
+            ".filter__group > a"
+
+            let links = await page.$$("#tournament-table > .tournamentTableDraw__filter > .filter__group > a");
+            for (let i = 0; i < links.length; i++) {
+                const link = links[i];
+
+                await Promise.all([
+                    page.waitForNavigation(),
+                    page.evaluate((el: HTMLSpanElement) => el.click(), link),
+                ])
+                await page.waitForSelector("#tournament-table-tabs-and-content");
+
+                const url = page.url();
+
+                if (url.includes("table")) {
+                    return url;
+                }
+
+                await Promise.all([
+                    page.waitForNavigation(),
+                    page.goBack(),
+                ]);
+
+                links = await page.$$("#tournament-table > .tournamentTableDraw__filter > .filter__group > a");
+            }
+
+            return baseClassificacaoUrl;
+        })
 
         await ScraperUtils.scrapePage({ url: classificacaoUrl, page: options.page }, async (page) => {
             const posicoes = await Promise.all(await page
@@ -324,10 +353,10 @@ export class CampeonatosScraperService {
                             const dataText = element.querySelector(".event__time").textContent;
                             const timeCasa = element.querySelector(".event__participant--home").textContent;
                             const timeFora = element.querySelector(".event__participant--away").textContent;
-                            const golsCasa = element.querySelector(".event__score--home").textContent;
-                            const golsFora = element.querySelector(".event__score--away").textContent;
-                            const escudoCasaUrl = element.querySelector<HTMLImageElement>(".event__logo--home").src;
-                            const escudoForaUrl = element.querySelector<HTMLImageElement>(".event__logo--away").src;
+                            const golsCasa = element.querySelector(".event__score--home")?.textContent ?? "";
+                            const golsFora = element.querySelector(".event__score--away")?.textContent ?? "";
+                            const escudoCasaUrl = element.querySelector<HTMLImageElement>(".event__logo--home")?.src ?? "";
+                            const escudoForaUrl = element.querySelector<HTMLImageElement>(".event__logo--away")?.src ?? "";
 
                             return {
                                 id: element.id,
