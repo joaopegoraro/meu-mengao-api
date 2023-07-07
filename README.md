@@ -1,30 +1,14 @@
 <p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
+  <img src="./logo.png?raw=true" width="200" alt="Meu Mengão Logo" />
 </p>
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+<h1 align="center"> Meu Mengão API </h1>
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+<p align="center">
+NestJS API that scrapes the top news and sport sites for Flamengo's news, fixtures, results and standings, and exposes it through some endpoints.
+Made for the  
+<a href="https://github.com/joaopegoraro/meu-mengao">Meu Mengão App.</a></p>
 
-## Description
-
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
 
 ## Installation
 
@@ -58,16 +42,177 @@ $ npm run test:e2e
 $ npm run test:cov
 ```
 
-## Support
+# Endpoints
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
 
-## Stay in touch
+## Get list of news articles
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+### Request
 
-## License
+`GET /noticias`
 
-Nest is [MIT licensed](LICENSE).
+### Response
+```json
+{
+  [
+    "id": 12345,
+    "link": "https://somesite.com/some_article",
+    "data": "1688689100456", // Milliseconds since epoch
+    "titulo": "Title",
+    "logoSite": "<Base 64 string of the logo of the article's site>",
+    "foto": "<Base 64 string of the article's main image>"
+  ]
+}
+```
+
+## Get the details of the upcoming match
+
+### Request
+
+`GET /partidas/proxima`
+
+### Response
+```json
+{
+  "id": "djfKa#21",
+  "campeonato": "Libertadores",
+  "campeonatoId": "libertadores",
+  "data": "1688689100456", // Milliseconds since epoch
+  "rodadaName": "Oitavas de Final",
+  "rodadaIndex" 1, // the position of the round in relation to other rounds, 0 is the oldest round
+  "timeCasa": "Flamengo",
+  "golsCasa": "3",
+  "timeFora": "Fluminense",
+  "golsFora": "0",
+  "escudoCasa": "<Base 64 string of the home team logo>",
+  "escudoFora": "<Base 64 string of the away team logo>"
+}
+```
+
+## Get list of the already played matches (results)
+
+### Request
+
+`GET /partidas/resultados`
+
+### Response
+```json
+{
+  [
+    "id": "djfKa#21",
+    "campeonato": "Libertadores",
+    "campeonatoId": "libertadores",
+    "data": "1688689100456", // Milliseconds since epoch
+    "rodadaName": "Oitavas de Final",
+    "rodadaIndex" 1, // the position of the round in relation to other rounds, 0 is the oldest round
+    "timeCasa": "Flamengo",
+    "golsCasa": "3",
+    "timeFora": "Fluminense",
+    "golsFora": "0",
+    "escudoCasa": "<Base 64 string of the home team logo>",
+    "escudoFora": "<Base 64 string of the away team logo>"
+  ]
+}
+```
+
+## Get list of the upcoming matches (calendar)
+
+### Request
+
+`GET /partidas/calendario`
+
+### Response
+```json
+{
+  [
+    "id": "djfKa#21",
+    "campeonato": "Libertadores",
+    "campeonatoId": "libertadores",
+    "data": "1688689100456", // Milliseconds since epoch
+    "rodadaName": "Oitavas de Final",
+    "rodadaIndex" 1, // the position of the round in relation to other rounds, 0 is the oldest round
+    "timeCasa": "Flamengo",
+    "golsCasa": "3",
+    "timeFora": "Fluminense",
+    "golsFora": "0",
+    "escudoCasa": "<Base 64 string of the home team logo>",
+    "escudoFora": "<Base 64 string of the away team logo>"
+  ]
+}
+```
+
+
+## Get list of the championships Flamengo is enrolled in
+
+### Request
+
+`GET /campeonatos`
+
+### Response
+```json
+{
+  [
+    "id": "libertadores",
+    "nome": "Libertadores", 
+    "ano": "2023", 
+    "logo": "<Base 64 string of the championship logo>",
+    "rodadaAtual": 1, // index of the most recent round
+    "possuiClassificacao": false, // wheter or not the championship has a standings table
+  ]
+}
+```
+
+## Get standings of selected championship
+
+### Request
+
+`GET /posicao/campeonato/{id}`
+
+### Response
+```json
+{
+  [
+    "id": "someRandomId",
+    "posicao": "1",
+    "nomeTime": "Flamengo", 
+    "escudoTime": "<Base 64 string of the team logo>",
+    "pontos": "90",
+    "jogos": "38",
+    "vitorias": "28",
+    "empates": "6",
+    "derrotas": "4",
+    "golsFeitos": "86",
+    "golsSofridos": "37",
+    "saldoGols": "49",
+    "campeonatoId": "serie-a",
+    "classificacaoName": "Grupo A",
+    "classificacaoIndex": 0
+  ]
+}
+```
+
+## Get list of the championship matches
+
+### Request
+
+`GET /partidas/campeonato/{id}`
+
+### Response
+```json
+{
+  [
+    "id": "djfKa#21",
+    "campeonato": "Libertadores",
+    "campeonatoId": "libertadores",
+    "data": "1688689100456", // Milliseconds since epoch
+    "rodadaName": "Oitavas de Final",
+    "rodadaIndex" 1, // the position of the round in relation to other rounds, 0 is the oldest round
+    "timeCasa": "Flamengo",
+    "golsCasa": "3",
+    "timeFora": "Fluminense",
+    "golsFora": "0",
+    "escudoCasa": "<Base 64 string of the home team logo>",
+    "escudoFora": "<Base 64 string of the away team logo>"
+  ]
+}
+```
