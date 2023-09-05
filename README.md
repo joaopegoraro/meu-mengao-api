@@ -1,3 +1,11 @@
+# **DEPRECATION NOTICE**
+This API is now deprecated in favor of the new one which is part of the [new website](https://github.com/joaopegoraro/meu-mengao-web). 
+The API may still be online for a while until most or all users of the [app](https://github.com/joaopegoraro/meu-mengao) have updated to the latest version which 
+consumes the new API. 
+
+All in all, NestJS and Typescript are pretty cool, so it was a good run. But for low-traffic websites and APIs, which are hosted in a cheap VPS, 
+PHP is just so much better and lightweight, so that is the reason why I opted to make the [website](https://github.com/joaopegoraro/meu-mengao-web), and then remake the API, in PHP.
+
 <p align="center">
   <img src="./logo.png?raw=true" width="200" alt="Meu Mengão Logo" />
 </p>
