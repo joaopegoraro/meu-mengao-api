@@ -6,6 +6,9 @@ consumes the new API.
 All in all, NestJS and Typescript are pretty cool, so it was a good run. But for low-traffic websites and APIs, which are hosted in a cheap VPS, 
 PHP is just so much better and lightweight, so that is the reason why I opted to make the [website](https://github.com/joaopegoraro/meu-mengao-web), and then remake the API, in PHP.
 
+The [scraper](https://github.com/joaopegoraro/meu-mengao-crawler), however, was moved to its own repo, and is still written in Typescript, except it is a standalone script that is 
+executed by a cron job in the server.
+
 <p align="center">
   <img src="./logo.png?raw=true" width="200" alt="Meu Mengão Logo" />
 </p>
